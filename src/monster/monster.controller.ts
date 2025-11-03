@@ -7,6 +7,7 @@ export class MonsterController {
     constructor(private readonly monsterService: MonsterService){}
     @Post('/create')
     create(@Body() data: MonsterCreateDto): any {
-this.monsterService.create(data)
+const msg = this.monsterService.create(data)
+return msg
     }
 }
