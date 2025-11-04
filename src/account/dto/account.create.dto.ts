@@ -1,18 +1,14 @@
-import { IsNumber, IsString } from 'class-validator';
+import { IsIn, IsString } from 'class-validator';
 
 export class AccountCreateDto {
   @IsString()
-  name: string;
+  @IsIn(['FREE', 'PREMIUM'])
+  accountType: 'FREE' | 'PREMMIUM';
 
   @IsString()
-  email: string;
-
-  @IsNumber()
-  age: number;
+  @IsIn(['BANISHED', 'SUSPEND', 'NORMAL'])
+  accountStatus: 'BANISHED' | 'SUSPEND' | 'NORMAL';
 
   @IsString()
-  nacionality: string;
-
-  @IsString()
-  password: string;
+  userId: string;
 }

@@ -3,18 +3,19 @@ import {
   Injectable,
   UnauthorizedException,
 } from '@nestjs/common';
-import { AccountCreateDto } from './dto/account.create.dto';
 import { AccountRepository } from './repository/account.repository';
 import * as bcrypt from 'bcryptjs';
 import { User } from './entities/user.entity';
 import * as jwt from 'jsonwebtoken';
 import { LoginDto } from './dto/login.dto';
+import { UserCreateDto } from './dto/user.create.dto';
+import { AccountStatus, AccountType } from '@prisma/client';
 
 @Injectable()
 export class AccountService {
   constructor(private readonly repository: AccountRepository) {}
 
-  async create(data: AccountCreateDto) {
+  async create(data: UserCreateDto) {
     const email = await this.repository.findByEmail(data.email);
     if (email) {
       throw new BadRequestException('Já existe uma conta com este email.');
@@ -22,7 +23,18 @@ export class AccountService {
     try {
       const hashedPassword = bcrypt.hashSync(data.password, 10);
       data.password = hashedPassword;
-      return await this.repository.create(data);
+      const newUser = await this.repository.create(data);
+      const accountPayload = {
+        accountType: AccountType.FREE,
+        accountStatus: AccountStatus.NORMAL,
+        userId: newUser.id,
+      };
+      const account = await this.repository.createAccount(accountPayload);
+
+      return {
+        user: newUser,
+        account,
+      };
     } catch (error) {
       throw new BadRequestException('Houve um erro ao criar o usuário');
     }

@@ -1,18 +1,20 @@
 import { Injectable } from '@nestjs/common';
 import { AccountRepository } from '../account.repository';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { AccountCreateDto } from 'src/account/dto/account.create.dto';
+import { UserCreateDto } from 'src/account/dto/user.create.dto';
 import { User } from 'src/account/entities/user.entity';
+import { Account } from 'src/account/entities/account.entity';
+import { AccountCreateDto } from 'src/account/dto/account.create.dto';
 
 @Injectable()
 export class AccountPrismaRepository implements AccountRepository {
   constructor(private readonly prisma: PrismaService) {}
 
-  async create(data: AccountCreateDto) {
+  async create(data: UserCreateDto) {
     return await this.prisma.user.create({
       data: {
         email: data.email,
-        idade: data.age,
+        age: data.age,
         name: data.name,
         nacionality: data.nacionality,
         password: data.password,
@@ -34,6 +36,9 @@ export class AccountPrismaRepository implements AccountRepository {
       where: {
         id,
       },
+      include: {
+        account: true,
+      },
     });
   }
 
@@ -50,5 +55,17 @@ export class AccountPrismaRepository implements AccountRepository {
 
   async findAll(): Promise<User[]> {
     return await this.prisma.user.findMany();
+  }
+
+  async createAccount(data: AccountCreateDto): Promise<Account> {
+    const account = await this.prisma.account.create({
+      data: {
+        accountStatus: data.accountStatus,
+        accountType: data.accountType,
+        userId: data.userId,
+      },
+    });
+
+    return account as Account;
   }
 }

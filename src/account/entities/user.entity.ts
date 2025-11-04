@@ -3,7 +3,7 @@ export class User {
   name: string;
   email: string;
   password: string;
-  idade: number;
+  age: number;
   nacionality: string;
   confirmed: boolean;
 }

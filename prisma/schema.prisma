@@ -19,29 +19,165 @@ enum AccountStatus {
   NORMAL
 }
 
+enum TypeSkillBenefity {
+  SHIELD_INCREASE
+  ATTACK_INCREASE
+  LIFE_DRAIN
+  MANA_DRAIN
+}
+
 enum AccountType {
-  free
-  premmium
+  FREE
+  PREMMIUM
+}
+
+enum ClasseType {
+  KNIGHT
+  MAGE
+  HEALER
+  ARCHER
+}
+
+enum SkillUtilityType {
+  STUN // O inimigo ficará 1 round sem se movimentar / atacar.
+  SNARE // Encanta o inimigo e o mesmo não pode usar magia / porção.
+  FEAR // Amedronta o inimigo e reduz a armadura.
+}
+
+enum skillType {
+  ATACK
+  DEFENSE
+  HEAL
+}
+
+enum Attribute {
+  DISTANCE
+  SWORD
+  MAGIC
 }
 
 model User {
-  id          String    @id @unique @default(uuid())
+  id          String    @id @default(uuid())
   name        String
   email       String
   password    String
-  idade       Int
+  age         Int
   nacionality String
   confirmed   Boolean
   createdAt   DateTime  @default(now()) @map("created_at")
   updatedAt   DateTime  @updatedAt @map("updated_at")
   deletedAt   DateTime? @map("deleted_at")
+
+  account Account? @relation("UserAccount")
+
+  @@map("users")
 }
 
 model Account {
-  id            String        @id @unique @default(uuid())
-  accountStatus AccountStatus
-  accountType   AccountType
+  id            String        @id @default(uuid())
+  accountStatus AccountStatus @map("account_status")
+  accountType   AccountType   @map("account_type")
   createdAt     DateTime      @default(now()) @map("created_at")
   updatedAt     DateTime      @updatedAt @map("updated_at")
   deletedAt     DateTime?     @map("deleted_at")
+  characeters   Character[]
+
+  userId String @unique
+  user   User   @relation("UserAccount", fields: [userId], references: [id])
+
+  @@map("accounts")
+}
+
+model Classe {
+  id          String      @id @default(uuid())
+  type        ClasseType
+  character   Character[]
+  skill       Skill[]
+  manaBase    Int         @map("mana_base")
+  lifeBase    Int         @map("life_base")
+  damageBase  Int         @map("damage_base")
+  defenseBase Int         @map("defense_base")
+  attribute   Attribute
+
+  createdAt DateTime  @default(now()) @map("created_at")
+  updatedAt DateTime  @updatedAt @map("updated_at")
+  deletedAt DateTime? @map("deleted_at")
+
+  @@map("classes")
+}
+
+model Skill {
+  id              String            @id @default(uuid())
+  name            String
+  description     String
+  mana            Int
+  type            skillType
+  utility         SkillUtilityType?
+  classeId        String?           @map("class_id")
+  skillValueId    String            @map("skill_value_id")
+  skillBenefityId String?           @map("skill_benefity_id")
+  skillBenefity   SkillBenefity?    @relation(fields: [skillBenefityId], references: [id])
+  Classe          Classe?           @relation(fields: [classeId], references: [id])
+  value           SkillValue        @relation(fields: [skillValueId], references: [id])
+
+  @@map("skills")
+}
+
+model SkillBenefity {
+  id    String            @id @default(uuid())
+  value Int
+  type  TypeSkillBenefity
+  Skill Skill[]
+
+  @@map("skill_benefities")
+}
+
+model SkillValue {
+  id    String  @id @default(uuid())
+  value Float
+  Skill Skill[]
+
+  @@map("skill_values")
+}
+
+model Character {
+  id                  String            @id @default(uuid())
+  mana                Int
+  life                Int
+  damage              Int
+  nivelAttribute      Int               @map("nivel_attribute")
+  defense             Int
+  magic               Int
+  stamina             Int
+  lvl                 Int
+  actualExperience    Float             @map("actual_experience")
+  accountId           String            @map("account_id")
+  classeId            String            @map("classe_id")
+  characterProgressId String            @unique @map("character_progress_id")
+  account             Account           @relation(fields: [accountId], references: [id])
+  classe              Classe            @relation(fields: [classeId], references: [id])
+  progress            CharacterProgress @relation("CharacterProgress", fields: [characterProgressId], references: [id])
+
+  @@map("characters")
+}
+
+model CharacterProgress {
+  id               String     @id @default(uuid())
+  actualExperience Float      @map("actual_experience")
+  toNextLvl        Float      @map("to_next_lvl")
+  Character        Character? @relation("CharacterProgress")
+
+  @@map("characters_progresses")
+}
+
+model Inventory {
+  id String @id @default(uuid())
+
+  @@map("invetories")
+}
+
+model Item {
+  id String @id @default(uuid())
+
+  @@map("items")
 }

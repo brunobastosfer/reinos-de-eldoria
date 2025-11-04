@@ -1,5 +1,5 @@
 import { Body, Controller, Get, Post } from '@nestjs/common';
-import { AccountCreateDto } from './dto/account.create.dto';
+import { UserCreateDto } from './dto/user.create.dto';
 import { AccountService } from './account.service';
 import { CredentialsValidationPipe } from './pipes/validate-credential.pipe';
 import { LoginDto } from './dto/login.dto';
@@ -8,7 +8,7 @@ import { LoginDto } from './dto/login.dto';
 export class AccountController {
   constructor(private readonly accountService: AccountService) {}
   @Post('/create')
-  async create(@Body() data: AccountCreateDto) {
+  async create(@Body() data: UserCreateDto) {
     await this.accountService.create(data);
   }
 
