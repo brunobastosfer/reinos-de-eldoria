@@ -1,4 +1,4 @@
-export class ItensCreateDto {
+export class ItemCreateDto {
 name: string
 attack: number
 defense: number

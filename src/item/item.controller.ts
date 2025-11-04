@@ -1,12 +1,12 @@
 import { Body, Controller, Post } from "@nestjs/common";
-import { ItensCreateDto } from "./dto/item.create.dto";
-import { ItensService } from "./item.service";
+import { ItemCreateDto } from "./dto/item.create.dto";
+import { ItemService } from "./item.service";
 
-@Controller('monster')
-export class ItensController {
-    constructor(private readonly itemService: ItensService){}
+@Controller('item')
+export class ItemController {
+    constructor(private readonly itemService: ItemService){}
     @Post('/create')
-    create(@Body() data: ItensCreateDto): any {
+    create(@Body() data: ItemCreateDto): any {
 const msg = this.itemService.create(data)
 return msg
     }

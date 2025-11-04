@@ -1,6 +1,6 @@
-import { ItensCreateDto } from "../dto/item.create.dto";
+import { ItemCreateDto } from "../dto/item.create.dto";
 
-export abstract class ItensRepository {
-abstract create(data: ItensCreateDto): any
+export abstract class ItemRepository {
+abstract create(data: ItemCreateDto): any
 abstract findByItem(Item: string): any
 }

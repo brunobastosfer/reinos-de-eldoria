@@ -1,13 +1,13 @@
 import { Module } from '@nestjs/common';
-import { ItensController } from './item.controller';
-import { ItensService } from './item.service';
-import { ItensRepository } from './repository/item.repository';
-import { ItensPrismaRepository } from './repository/prisma/item.prisma.repository';
+import { ItemController } from './item.controller';
+import { ItemService } from './item.service';
+import { ItemRepository } from './repository/item.repository';
+import { ItemPrismaRepository } from './repository/prisma/item.prisma.repository';
 
 
 @Module({
   imports: [],
-  controllers: [ItensController],
-  providers: [ItensService, {provide: ItensRepository, useClass: ItensPrismaRepository}],
+  controllers: [ItemController],
+  providers: [ItemService, {provide: ItemRepository, useClass: ItemPrismaRepository}],
 })
-export class ItensModule {}
+export class ItemModule {}
