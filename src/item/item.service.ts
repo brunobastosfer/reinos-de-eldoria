@@ -1,6 +1,6 @@
 import { Injectable } from "@nestjs/common";
-import { ItensCreateDto } from "./dto/itens.create.dto";
-import { ItensRepository } from "./repository/itens.repository";
+import { ItensCreateDto } from "./dto/item.create.dto";
+import { ItensRepository } from "./repository/item.repository";
 
 @Injectable()
 export class ItensService {

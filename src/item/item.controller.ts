@@ -1,6 +1,6 @@
 import { Body, Controller, Post } from "@nestjs/common";
-import { ItensCreateDto } from "./dto/itens.create.dto";
-import { ItensService } from "./itens.service";
+import { ItensCreateDto } from "./dto/item.create.dto";
+import { ItensService } from "./item.service";
 
 @Controller('monster')
 export class ItensController {

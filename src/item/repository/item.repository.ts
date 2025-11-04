@@ -1,4 +1,4 @@
-import { ItensCreateDto } from "../dto/itens.create.dto";
+import { ItensCreateDto } from "../dto/item.create.dto";
 
 export abstract class ItensRepository {
 abstract create(data: ItensCreateDto): any
