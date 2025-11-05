@@ -8,6 +8,7 @@ import { ConfigModule } from '@nestjs/config';
 import { CharacterModule } from './character/character.module';
 import { ClasseModule } from './classe/classe.module';
 import { DropModule } from './drop/drop.module';
+import { ItemModule } from './item/item.module';
 
 @Module({
   imports: [
@@ -20,6 +21,7 @@ import { DropModule } from './drop/drop.module';
     ClasseModule,
     CharacterModule,
     DropModule,
+    ItemModule,
   ],
   controllers: [AppController],
   providers: [AppService],

@@ -8,7 +8,7 @@ export class MonsterCreateDto {
   @IsOptional()
   description: string;
 
-  @IsString()
+  @IsInt()
   lvl: number;
 
   @IsInt()
@@ -19,4 +19,7 @@ export class MonsterCreateDto {
 
   @IsInt()
   experience: number;
+
+  @IsInt()
+  life: number;
 }

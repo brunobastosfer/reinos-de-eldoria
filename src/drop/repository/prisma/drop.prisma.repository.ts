@@ -70,4 +70,23 @@ export class DropPrismaRepository implements DropRepository {
       },
     });
   }
+
+  async findDropLogByCharacterId(id: string): Promise<DropLog[]> {
+    return await this.prisma.dropLog.findMany({
+      where: {
+        characterId: id,
+      },
+    });
+  }
+
+  async findDropByMonsterId(id: string): Promise<MonsterDrop[]> {
+    return await this.prisma.monsterDrop.findMany({
+      where: {
+        monsterId: id,
+      },
+      include: {
+        possibleItems: true,
+      },
+    });
+  }
 }

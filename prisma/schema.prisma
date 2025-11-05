@@ -217,6 +217,7 @@ model Monster {
   defense     Int
   damage      Int
   experience  Int
+  life        Int
   skill       Skill[]
   MonsterDrop MonsterDrop[]
   createdAt   DateTime      @default(now()) @map("created_at")
@@ -300,9 +301,10 @@ model Item {
   id              String              @id @default(uuid())
   name            String
   description     String?
-  attack          String?
-  defense         String?
+  attack          Int?
+  defense         Int?
   rarity          RarityType
+  vocation        ClasseType
   createdAt       DateTime            @default(now()) @map("created_at")
   updatedAt       DateTime            @updatedAt @map("updated_at")
   deletedAt       DateTime?           @map("deleted_at")

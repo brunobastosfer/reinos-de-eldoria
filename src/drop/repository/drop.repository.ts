@@ -13,4 +13,6 @@ export abstract class DropRepository {
     data: CreateMonsterItemDropDto,
   ): Promise<MonsterDropItem>;
   abstract createDropLog(data: CreateDropLogDto): Promise<DropLog>;
+  abstract findDropLogByCharacterId(id: string): Promise<DropLog[]>;
+  abstract findDropByMonsterId(id: string): Promise<MonsterDrop[]>;
 }

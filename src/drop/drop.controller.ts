@@ -1,14 +1,5 @@
-import {
-  Controller,
-  Get,
-  Post,
-  Body,
-  Patch,
-  Param,
-  Delete,
-} from '@nestjs/common';
+import { Controller, Get, Post, Body, Param } from '@nestjs/common';
 import { DropService } from './drop.service';
-import { UpdateDropDto } from './dto/update-drop.dto';
 import { CreateMonsterDropDto } from './dto/create-monster-drop.dto';
 import { CreateMonsterItemDropDto } from './dto/create-monster-item-drop.dto';
 
@@ -33,18 +24,13 @@ export class DropController {
     return this.dropService.findAll();
   }
 
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.dropService.findOne(+id);
+  @Get('/monster/:id')
+  async findDropByMonsterId(@Param('id') id: string) {
+    return await this.dropService.findDropByMonsterId(id);
   }
 
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateDropDto: UpdateDropDto) {
-    return this.dropService.update(+id, updateDropDto);
-  }
-
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.dropService.remove(+id);
+  @Get('/drop-log/character/:id')
+  async findDropLogByCharacterId(@Param('id') id: string) {
+    return await this.dropService.findDropLogByCharacterId(id);
   }
 }

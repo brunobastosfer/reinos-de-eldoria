@@ -1,17 +1,22 @@
-import { Injectable } from "@nestjs/common";
-import { ItensCreateDto } from "./dto/item.create.dto";
-import { ItensRepository } from "./repository/item.repository";
+import { BadRequestException, Injectable } from '@nestjs/common';
+import { ItemRepository } from './repository/item.repository';
+import { ItemCreateDto } from './dto/item.create.dto';
+import { Item } from './entities/item.entity';
 
 @Injectable()
-export class ItensService {
-    constructor(private readonly repository: ItensRepository){}
-create(data: ItensCreateDto): any {
-    const item = this.repository.findByItem(data.name)
-    console.log (item)
-    if(item){
-       return 'Já existe um item com esse nome.'
+export class ItemService {
+  constructor(private readonly repository: ItemRepository) {}
+
+  async create(data: ItemCreateDto): Promise<Item> {
+    const item = await this.repository.findByName(data.name);
+    console.log(item);
+    if (item) {
+      throw new BadRequestException('Já existe um item com este nome');
     }
-this.repository.create(data)
-return 'Item criado com sucesso.'
-}
+    return await this.repository.create(data);
+  }
+
+  async findAll(): Promise<Item[]> {
+    return await this.repository.findAll();
+  }
 }

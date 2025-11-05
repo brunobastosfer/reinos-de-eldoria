@@ -1,6 +1,5 @@
 import { Injectable } from '@nestjs/common';
 import { CreateMonsterDropDto } from './dto/create-monster-drop.dto';
-import { UpdateDropDto } from './dto/update-drop.dto';
 import { DropRepository } from './repository/drop.repository';
 import { CreateMonsterItemDropDto } from './dto/create-monster-item-drop.dto';
 import { CreateDropLogDto } from './dto/create-drop-log.dto';
@@ -25,15 +24,11 @@ export class DropService {
     return `This action returns all drop`;
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} drop`;
+  async findDropLogByCharacterId(id: string) {
+    return await this.repository.findDropLogByCharacterId(id);
   }
 
-  update(id: number, updateDropDto: UpdateDropDto) {
-    return `This action updates a #${id} drop`;
-  }
-
-  remove(id: number) {
-    return `This action removes a #${id} drop`;
+  async findDropByMonsterId(id: string) {
+    return await this.repository.findDropByMonsterId(id);
   }
 }

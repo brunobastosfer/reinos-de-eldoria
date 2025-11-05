@@ -2,18 +2,18 @@ import { BadRequestException, Injectable } from '@nestjs/common';
 import { MonsterCreateDto } from './dto/monster.create.dto';
 import { MonsterRepository } from './repository/monster.repository';
 import { MonsterDefeatDto } from './dto/monster-defeat.dto';
-import { DropRepository } from 'src/drop/repository/drop.repository';
 import { BoostType, RarityType } from '@prisma/client';
-import { CharacterRepository } from 'src/character/repository/character.repository';
 import { Monster } from './entities/monster.entity';
 import { MonsterDrop } from 'src/drop/entities/monster-drop.entity';
+import { DropService } from 'src/drop/drop.service';
+import { CharacterService } from 'src/character/character.service';
 
 @Injectable()
 export class MonsterService {
   constructor(
     private readonly repository: MonsterRepository,
-    private readonly dropRepository: DropRepository,
-    private readonly characterRepository: CharacterRepository,
+    private readonly dropService: DropService,
+    private readonly characterService: CharacterService,
   ) {}
 
   async create(data: MonsterCreateDto): Promise<Monster> {
@@ -24,8 +24,12 @@ export class MonsterService {
     return await this.repository.create(data);
   }
 
+  async findAll(): Promise<Monster[]> {
+    return await this.repository.findAll();
+  }
+
   async monsterDefeat(data: MonsterDefeatDto) {
-    const character = await this.characterRepository.findById(data.characterId);
+    const character = await this.characterService.findById(data.characterId);
     const monster = await this.repository.findById(data.monsterId);
     if (!character || !monster) {
       throw new BadRequestException('Monstro ou personagem não encontrados.');
@@ -72,7 +76,7 @@ export class MonsterService {
         monster.lvl,
       );
 
-      await this.dropRepository.createDropLog({
+      await this.dropService.createDropLog({
         goldDropped: gold,
         playerId: character.accountId,
         characterId: character.id,
@@ -81,7 +85,36 @@ export class MonsterService {
         itemsDropped: droppedItems,
       });
 
-      await this.characterRepository.incrementGold(character.id, gold);
+      await this.characterService.incrementGold(character.id, gold);
+
+      return {
+        goldDropped: gold,
+        itemsDropped: droppedItems,
+      };
+    } else {
+      console.log('monsterDrop', monsterDrop);
+      console.log('nao tem');
+      const gold = this.getGoldDrop(
+        monsterDrop.minGold,
+        monsterDrop.maxGold,
+        monster.lvl,
+      );
+
+      await this.dropService.createDropLog({
+        goldDropped: gold,
+        playerId: character.accountId,
+        characterId: character.id,
+        monsterId: monster.id,
+        luckApplied: luckMultiplier,
+        itemsDropped: droppedItems,
+      });
+
+      await this.characterService.incrementGold(character.id, gold);
+
+      return {
+        goldDropped: gold,
+        itemsDropped: droppedItems,
+      };
     }
   }
 

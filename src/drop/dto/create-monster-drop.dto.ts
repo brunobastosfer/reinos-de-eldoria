@@ -1,4 +1,4 @@
-import { IsNumber, IsString } from 'class-validator';
+import { IsNumber, IsOptional, IsString } from 'class-validator';
 
 export class CreateMonsterDropDto {
   @IsNumber()
@@ -8,7 +8,8 @@ export class CreateMonsterDropDto {
   maxGold: number;
 
   @IsString()
-  itemId: string;
+  @IsOptional()
+  itemId?: string;
 
   @IsString()
   monsterId: string;

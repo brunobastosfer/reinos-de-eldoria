@@ -14,5 +14,6 @@ import { AccountModule } from 'src/account/account.module';
     { provide: CharacterRepository, useClass: CharacterPrismaRepository },
     PrismaService,
   ],
+  exports: [CharacterService],
 })
 export class CharacterModule {}
