@@ -1,0 +1,330 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum AccountStatus {
+  BANISHED
+  SUSPEND
+  NORMAL
+}
+
+enum TypeSkillBenefity {
+  SHIELD_INCREASE
+  ATTACK_INCREASE
+  LIFE_DRAIN
+  MANA_DRAIN
+}
+
+enum AccountType {
+  FREE
+  PREMMIUM
+}
+
+enum ClasseType {
+  KNIGHT
+  MAGE
+  HEALER
+  ARCHER
+}
+
+enum SkillUtilityType {
+  STUN // O inimigo ficará 1 round sem se movimentar / atacar.
+  SNARE // Encanta o inimigo e o mesmo não pode usar magia / porção.
+  FEAR // Amedronta o inimigo e reduz a armadura.
+}
+
+enum skillType {
+  ATACK
+  DEFENSE
+  HEAL
+}
+
+enum Attribute {
+  DISTANCE
+  SWORD
+  MAGIC
+}
+
+enum RarityType {
+  COMUM
+  INCOMUM
+  RARO
+  EPIC
+  LENDARY
+}
+
+enum BoostType {
+  EXPERIENCE
+  TRAINER
+  LUCKY
+}
+
+model User {
+  id          String    @id @default(uuid())
+  name        String
+  email       String
+  password    String
+  age         Int
+  nacionality String
+  confirmed   Boolean
+  createdAt   DateTime  @default(now()) @map("created_at")
+  updatedAt   DateTime  @updatedAt @map("updated_at")
+  deletedAt   DateTime? @map("deleted_at")
+
+  account Account? @relation("UserAccount")
+
+  @@map("users")
+}
+
+model Account {
+  id            String        @id @default(uuid())
+  accountStatus AccountStatus @map("account_status")
+  accountType   AccountType   @map("account_type")
+  createdAt     DateTime      @default(now()) @map("created_at")
+  updatedAt     DateTime      @updatedAt @map("updated_at")
+  deletedAt     DateTime?     @map("deleted_at")
+  characters    Character[]
+
+  userId String @unique
+  user   User   @relation("UserAccount", fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+
+  @@map("accounts")
+}
+
+model Classe {
+  id          String      @id @default(uuid())
+  type        ClasseType
+  manaBase    Int         @map("mana_base")
+  lifeBase    Int         @map("life_base")
+  damageBase  Int         @map("damage_base")
+  defenseBase Int         @map("defense_base")
+  attribute   Attribute
+  skill       Skill[]
+  character   Character[]
+  createdAt   DateTime    @default(now()) @map("created_at")
+  updatedAt   DateTime    @updatedAt @map("updated_at")
+  deletedAt   DateTime?   @map("deleted_at")
+
+  @@map("classes")
+}
+
+model Skill {
+  id              String            @id @default(uuid())
+  name            String
+  description     String
+  mana            Int
+  type            skillType
+  utility         SkillUtilityType?
+  classeId        String?           @map("class_id")
+  skillValueId    String            @map("skill_value_id")
+  skillBenefityId String?           @map("skill_benefity_id")
+  skillBenefity   SkillBenefity?    @relation(fields: [skillBenefityId], references: [id])
+  Classe          Classe?           @relation(fields: [classeId], references: [id])
+  value           SkillValue        @relation(fields: [skillValueId], references: [id])
+  Monster         Monster?          @relation(fields: [monsterId], references: [id])
+  monsterId       String?
+
+  createdAt DateTime  @default(now()) @map("created_at")
+  updatedAt DateTime  @updatedAt @map("updated_at")
+  deletedAt DateTime? @map("deleted_at")
+
+  @@map("skills")
+}
+
+model SkillBenefity {
+  id    String            @id @default(uuid())
+  value Int
+  type  TypeSkillBenefity
+  Skill Skill[]
+
+  @@map("skill_benefities")
+}
+
+model SkillValue {
+  id    String  @id @default(uuid())
+  value Float
+  Skill Skill[]
+
+  @@map("skill_values")
+}
+
+model Character {
+  id               String              @id @default(uuid())
+  nickname         String
+  mana             Int
+  life             Int
+  damage           Int
+  nivelAttribute   Int                 @map("nivel_attribute")
+  defense          Int
+  magic            Int
+  stamina          Int
+  lvl              Int
+  actualExperience Float               @map("actual_experience")
+  accountId        String              @map("account_id")
+  classeId         String              @map("classe_id")
+  gold             Int                 @default(0)
+  account          Account             @relation(fields: [accountId], references: [id])
+  classe           Classe              @relation(fields: [classeId], references: [id])
+  progress         CharacterProgress?  @relation("CharacterProgress")
+  createdAt        DateTime            @default(now()) @map("created_at")
+  updatedAt        DateTime            @updatedAt @map("updated_at")
+  deletedAt        DateTime?           @map("deleted_at")
+  inventory        Inventory?          @relation("Inventory")
+  items            Item_To_Character[]
+  DropLog          DropLog[]
+  boosters         CharacterBooster[]
+
+  @@map("characters")
+}
+
+model Booster {
+  id          String             @id @default(uuid())
+  type        BoostType
+  activatedAt DateTime           @map("activated_at")
+  expiresAt   DateTime           @map("expires_at")
+  isActive    Boolean            @default(false) @map("isActive")
+  characters  CharacterBooster[]
+
+  @@map("boosters")
+}
+
+model CharacterBooster {
+  id          String    @id @default(uuid())
+  characterId String    @map("character_id")
+  boosterId   String    @map("booster_id")
+  booster     Booster   @relation(fields: [boosterId], references: [id])
+  character   Character @relation(fields: [characterId], references: [id])
+
+  @@map("character_booters")
+}
+
+model Monster {
+  id          String        @id @default(uuid())
+  name        String
+  description String?
+  lvl         Int
+  defense     Int
+  damage      Int
+  experience  Int
+  life        Int
+  skill       Skill[]
+  MonsterDrop MonsterDrop[]
+  createdAt   DateTime      @default(now()) @map("created_at")
+  updatedAt   DateTime      @updatedAt @map("updated_at")
+  deletedAt   DateTime?     @map("deleted_at")
+  DropLog     DropLog[]
+
+  @@map("monsters")
+}
+
+model MonsterDrop {
+  id            String            @id @default(uuid())
+  minGold       Int               @default(5) @map("min_gold")
+  maxGold       Int               @default(50) @map("max_gold")
+  itemId        String?           @map("item_id")
+  monsterId     String            @unique @map("monster_id")
+  Item          Item?             @relation(fields: [itemId], references: [id])
+  monster       Monster           @relation(fields: [monsterId], references: [id], onDelete: Cascade)
+  possibleItems MonsterDropItem[]
+  createdAt     DateTime          @default(now()) @map("created_at")
+  updatedAt     DateTime          @updatedAt @map("updated_at")
+  deletedAt     DateTime?         @map("deleted_at")
+
+  @@map("monster_drops")
+}
+
+model MonsterDropItem {
+  id            String      @id @default(uuid())
+  rarity        RarityType
+  baseChance    Float       @map("base_chance") // ex: 0.1 = 10% base chance
+  monsterDropId String      @map("monster_drop_id")
+  itemId        String      @map("item_id")
+  item          Item        @relation(fields: [itemId], references: [id])
+  monsterDrop   MonsterDrop @relation(fields: [monsterDropId], references: [id])
+
+  @@map("monster_drop_items")
+}
+
+model DropLog {
+  id           String     @id @default(uuid())
+  goldDropped  Int        @map("gold_dropped")
+  luckApplied  Float      @map("luck_applied")
+  playerId     String     @map("player_id")
+  monsterId    String     @map("monster_id")
+  itemId       String?    @map("item_id")
+  characterId  String?    @map("character_id")
+  Character    Character? @relation(fields: [characterId], references: [id])
+  Monster      Monster    @relation(fields: [monsterId], references: [id])
+  Item         Item?      @relation(fields: [itemId], references: [id])
+  itemsDropped String[]
+  createdAt    DateTime   @default(now()) @map("created_at")
+
+  @@map("drop_logs")
+}
+
+model CharacterProgress {
+  id               String    @id @default(uuid())
+  actualExperience Float     @map("actual_experience")
+  toNextLvl        Float     @map("to_next_lvl")
+  characterId      String    @unique @map("character_id")
+  character        Character @relation("CharacterProgress", fields: [characterId], references: [id])
+  createdAt        DateTime  @default(now()) @map("created_at")
+  updatedAt        DateTime  @updatedAt @map("updated_at")
+  deletedAt        DateTime? @map("deleted_at")
+
+  @@map("characters_progresses")
+}
+
+model Inventory {
+  id          String     @id @default(uuid())
+  characterId String     @unique @map("character_id")
+  character   Character? @relation("Inventory", fields: [characterId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  createdAt   DateTime   @default(now()) @map("created_at")
+  updatedAt   DateTime   @updatedAt @map("updated_at")
+  deletedAt   DateTime?  @map("deleted_at")
+
+  @@map("invetories")
+}
+
+model Item {
+  id              String              @id @default(uuid())
+  name            String
+  description     String?
+  attack          Int?
+  defense         Int?
+  rarity          RarityType
+  vocation        ClasseType
+  createdAt       DateTime            @default(now()) @map("created_at")
+  updatedAt       DateTime            @updatedAt @map("updated_at")
+  deletedAt       DateTime?           @map("deleted_at")
+  characters      Item_To_Character[]
+  monsters        MonsterDrop[]
+  DropLog         DropLog[]
+  MonsterDropItem MonsterDropItem[]
+
+  @@map("items")
+}
+
+model Item_To_Character {
+  id          String    @id @default(uuid())
+  characterId String    @map("character_id")
+  itemId      String    @map("item_id")
+  player      Character @relation(fields: [characterId], references: [id])
+  item        Item      @relation(fields: [itemId], references: [id])
+  createdAt   DateTime  @default(now()) @map("created_at")
+  updatedAt   DateTime  @updatedAt @map("updated_at")
+  deletedAt   DateTime? @map("deleted_at")
+
+  @@map("item_to_players")
+}

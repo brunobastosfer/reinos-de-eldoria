@@ -6,9 +6,8 @@ export class AppController {
   constructor(private readonly appService: AppService) {}
 
   @Get()
-  getHello(): string {
-    let nome = 'oioi';
-    return nome
+  login(): any {
+  
   }
 
   @Post()
@@ -16,3 +15,4 @@ export class AppController {
     return 'n'
   }
 }
+
