@@ -37,7 +37,11 @@ export class AccountPrismaRepository implements AccountRepository {
         id,
       },
       include: {
-        account: true,
+        account: {
+          include: {
+            characters: true,
+          },
+        },
       },
     });
   }
@@ -67,5 +71,16 @@ export class AccountPrismaRepository implements AccountRepository {
     });
 
     return account as Account;
+  }
+
+  async findAccountById(id: string): Promise<Account | null> {
+    return await this.prisma.account.findUnique({
+      where: {
+        id,
+      },
+      include: {
+        characters: true,
+      },
+    });
   }
 }

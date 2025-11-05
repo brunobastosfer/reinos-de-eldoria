@@ -12,5 +12,6 @@ import { AccountPrismaRepository } from './repository/prisma/account.prisma.repo
     { provide: AccountRepository, useClass: AccountPrismaRepository },
     PrismaService,
   ],
+  exports: [AccountService],
 })
 export class AccountModule {}

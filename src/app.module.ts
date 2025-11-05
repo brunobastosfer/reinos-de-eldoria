@@ -5,6 +5,9 @@ import { MonsterModule } from './monster/monster.module';
 import { AccountModule } from './account/account.module';
 import { ScheduleModule } from '@nestjs/schedule';
 import { ConfigModule } from '@nestjs/config';
+import { CharacterModule } from './character/character.module';
+import { ClasseModule } from './classe/classe.module';
+import { DropModule } from './drop/drop.module';
 
 @Module({
   imports: [
@@ -14,6 +17,9 @@ import { ConfigModule } from '@nestjs/config';
     }),
     MonsterModule,
     AccountModule,
+    ClasseModule,
+    CharacterModule,
+    DropModule,
   ],
   controllers: [AppController],
   providers: [AppService],

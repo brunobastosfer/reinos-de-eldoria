@@ -35,7 +35,7 @@ export class AccountService {
         user: newUser,
         account,
       };
-    } catch (error) {
+    } catch {
       throw new BadRequestException('Houve um erro ao criar o usuário');
     }
   }
@@ -70,7 +70,7 @@ export class AccountService {
     }
     try {
       await this.repository.confirm(id);
-    } catch (error) {
+    } catch {
       throw new BadRequestException('Erro ao confirmar conta.');
     }
   }
@@ -93,5 +93,13 @@ export class AccountService {
 
   async findAll() {
     return await this.repository.findAll();
+  }
+
+  async findById(id: string) {
+    return await this.repository.findById(id);
+  }
+
+  async findAccountById(id: string) {
+    return await this.repository.findAccountById(id);
   }
 }

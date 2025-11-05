@@ -10,4 +10,5 @@ export abstract class AccountRepository {
   abstract confirm(id: string): Promise<void>;
   abstract findAll(): Promise<User[]>;
   abstract createAccount(data: AccountCreateDto): Promise<Account>;
+  abstract findAccountById(id: string): Promise<Account | null>;
 }
