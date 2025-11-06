@@ -11,8 +11,8 @@ export class PlanService {
     return await this.repository.create(createPlanDto);
   }
 
-  findAll() {
-    return `This action returns all plan`;
+  async findAll() {
+    return await this.repository.findAll();
   }
 
   async findById(id: string) {

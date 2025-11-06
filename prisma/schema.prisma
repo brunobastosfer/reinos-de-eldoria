@@ -195,6 +195,7 @@ model Character {
   stamina          Int
   lvl              Int
   actualExperience Float               @map("actual_experience")
+  reputation       Int                 @default(0)
   accountId        String              @map("account_id")
   classeId         String              @map("classe_id")
   gold             Int                 @default(0)

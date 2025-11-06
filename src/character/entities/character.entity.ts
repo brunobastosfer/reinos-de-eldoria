@@ -1,4 +1,4 @@
-import { CharacterBooster } from 'src/Booster/entities/character-booster.entity';
+import { CharacterBooster } from '../../booster/entities/character-booster.entity';
 
 export class Character {
   id: string;

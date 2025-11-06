@@ -28,7 +28,7 @@ export class CharacterService {
     );
     console.log(account);
     if (
-      account?.accountType !== 'PREMMIUM' &&
+      account?.accountType !== 'PREMIUM' &&
       (account?.characters?.length ?? 0) >= 1
     ) {
       throw new BadRequestException(
