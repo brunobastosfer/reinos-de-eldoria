@@ -28,7 +28,7 @@ enum TypeSkillBenefity {
 
 enum AccountType {
   FREE
-  PREMMIUM
+  PREMIUM
 }
 
 enum ClasseType {
@@ -88,18 +88,42 @@ model User {
 }
 
 model Account {
-  id            String        @id @default(uuid())
-  accountStatus AccountStatus @map("account_status")
-  accountType   AccountType   @map("account_type")
-  createdAt     DateTime      @default(now()) @map("created_at")
-  updatedAt     DateTime      @updatedAt @map("updated_at")
-  deletedAt     DateTime?     @map("deleted_at")
+  id            String             @id @default(uuid())
+  accountStatus AccountStatus      @default(NORMAL) @map("account_status")
+  accountType   AccountType        @default(FREE) @map("account_type")
+  userId        String             @unique
+  user          User               @relation("UserAccount", fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   characters    Character[]
-
-  userId String @unique
-  user   User   @relation("UserAccount", fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  premium       PremiumToAccount[]
+  createdAt     DateTime           @default(now()) @map("created_at")
+  updatedAt     DateTime           @updatedAt @map("updated_at")
+  deletedAt     DateTime?          @map("deleted_at")
 
   @@map("accounts")
+}
+
+model PremiumAccount {
+  id      String             @id @default(uuid())
+  days    Int
+  price   Float
+  account PremiumToAccount[]
+
+  @@map("premium_account")
+}
+
+model PremiumToAccount {
+  id             String         @id @default(uuid())
+  activatedAt    DateTime       @map("activated_at")
+  expiratedAt    DateTime       @map("expirated_at")
+  accountId      String
+  premiumId      String
+  premiumAccount PremiumAccount @relation(fields: [premiumId], references: [id])
+  account        Account        @relation(fields: [accountId], references: [id])
+  createdAt      DateTime       @default(now()) @map("created_at")
+  updatedAt      DateTime       @updatedAt @map("updated_at")
+  deletedAt      DateTime?      @map("deleted_at")
+
+  @@map("premium_to_account")
 }
 
 model Classe {

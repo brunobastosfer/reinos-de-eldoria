@@ -3,6 +3,8 @@ import { UserCreateDto } from './dto/user.create.dto';
 import { AccountService } from './account.service';
 import { CredentialsValidationPipe } from './pipes/validate-credential.pipe';
 import { LoginDto } from './dto/login.dto';
+import { PremiumAccountDto } from './dto/premmium-account.dto';
+import { AccountValidationPipe } from './pipes/validate-account.pipe';
 
 @Controller('account')
 export class AccountController {
@@ -32,5 +34,14 @@ export class AccountController {
   @Get('')
   async findAll() {
     return await this.accountService.findAll();
+  }
+
+  //TODO: Criar um JOB para todo dia expirar as premmium account.
+  //TODO: Integrar com api de pagamento.
+  @Post('/active-premium')
+  async activePremmium(
+    @Body(AccountValidationPipe) premiumAccountDto: PremiumAccountDto,
+  ) {
+    return await this.accountService.activePremmium(premiumAccountDto);
   }
 }

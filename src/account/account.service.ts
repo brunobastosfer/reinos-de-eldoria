@@ -10,6 +10,7 @@ import * as jwt from 'jsonwebtoken';
 import { LoginDto } from './dto/login.dto';
 import { UserCreateDto } from './dto/user.create.dto';
 import { AccountStatus, AccountType } from '@prisma/client';
+import { PremiumAccountDto } from './dto/premmium-account.dto';
 
 @Injectable()
 export class AccountService {
@@ -101,5 +102,13 @@ export class AccountService {
 
   async findAccountById(id: string) {
     return await this.repository.findAccountById(id);
+  }
+
+  async activePremmium(data: PremiumAccountDto) {
+    return await this.repository.activePremium(data);
+  }
+
+  async findPremmiumAccount(id: string) {
+    return await this.repository.findPremiumAccount(id);
   }
 }

@@ -92,8 +92,6 @@ export class MonsterService {
         itemsDropped: droppedItems,
       };
     } else {
-      console.log('monsterDrop', monsterDrop);
-      console.log('nao tem');
       const gold = this.getGoldDrop(
         monsterDrop.minGold,
         monsterDrop.maxGold,
@@ -135,6 +133,9 @@ export class MonsterService {
 
   getGoldDrop(min: number, max: number, monsterLevel: number): number {
     const base = Math.floor(Math.random() * (max - min + 1)) + min;
-    return base + Math.floor(monsterLevel * 1.5);
+    const bonus = Math.floor(monsterLevel * 1.5);
+    const total = base + bonus;
+
+    return Math.max(min, Math.min(total, max));
   }
 }

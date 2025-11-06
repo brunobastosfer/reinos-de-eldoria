@@ -9,6 +9,7 @@ import { CharacterModule } from './character/character.module';
 import { ClasseModule } from './classe/classe.module';
 import { DropModule } from './drop/drop.module';
 import { ItemModule } from './item/item.module';
+import { PlanModule } from './plan/plan.module';
 
 @Module({
   imports: [
@@ -22,6 +23,7 @@ import { ItemModule } from './item/item.module';
     CharacterModule,
     DropModule,
     ItemModule,
+    PlanModule,
   ],
   controllers: [AppController],
   providers: [AppService],
