@@ -109,9 +109,16 @@ export class MonsterService {
 
       await this.characterService.incrementGold(character.id, gold);
 
+      const message = await this.characterService.updateCharacterProgress(
+        character.id,
+        monster.experience,
+        monster.name,
+      );
+
       return {
         goldDropped: gold,
         itemsDropped: droppedItems,
+        message,
       };
     }
   }

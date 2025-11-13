@@ -26,7 +26,6 @@ export class CharacterService {
     const account = await this.accountService.findAccountById(
       createCharacterDto.accountId,
     );
-    console.log(account);
     if (
       account?.accountType !== 'PREMIUM' &&
       (account?.characters?.length ?? 0) >= 1
@@ -55,5 +54,43 @@ export class CharacterService {
 
   async incrementGold(id: string, gold: number) {
     return await this.repository.incrementGold(id, gold);
+  }
+
+  async updateCharacterProgress(
+    characterId: string,
+    xpGain: number,
+    monsterName: string,
+  ) {
+    const character = await this.findById(characterId);
+    if (!character?.progress) {
+      throw new BadRequestException(
+        'Não há um progresso deste personagem com este ID.',
+      );
+    }
+    let actualExperience = character?.progress?.actualExperience + xpGain;
+    let lvl = character.lvl;
+
+    const xpToNextLevel = (level: number) => 40 * level ** 2;
+
+    let levelUp = false;
+
+    while (actualExperience >= xpToNextLevel(lvl)) {
+      actualExperience -= xpToNextLevel(lvl);
+      lvl += 1;
+      levelUp = true;
+    }
+
+    await this.repository.updateCharacterLvl(
+      characterId,
+      character.progress.id,
+      lvl,
+      actualExperience,
+    );
+
+    return {
+      message: levelUp
+        ? 'Parabéns, você passou de nível!'
+        : `Você matou o ${monsterName} e ganhou ${xpGain} de xp.`,
+    };
   }
 }

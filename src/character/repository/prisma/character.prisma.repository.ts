@@ -21,7 +21,6 @@ export class CharacterPrismaRepository implements CharacterRepository {
           magic: data.magic,
           stamina: 100,
           lvl: 1,
-          actualExperience: 0,
           accountId: data.accountId,
           classeId: data.classeId,
           nickname: data.nickname,
@@ -31,7 +30,7 @@ export class CharacterPrismaRepository implements CharacterRepository {
       await tx.characterProgress.create({
         data: {
           actualExperience: 0,
-          toNextLvl: 45,
+          toNextLvl: 40 * character.lvl ** 2,
           characterId: character.id,
         },
       });
@@ -51,7 +50,7 @@ export class CharacterPrismaRepository implements CharacterRepository {
   }
 
   async findAll(): Promise<Character[]> {
-    return await this.prisma.character.findMany({});
+    return await this.prisma.character.findMany();
   }
 
   async findById(id: string): Promise<Character | null> {
@@ -60,6 +59,7 @@ export class CharacterPrismaRepository implements CharacterRepository {
         id,
       },
       include: {
+        progress: true,
         boosters: {
           include: {
             booster: true,
@@ -89,6 +89,48 @@ export class CharacterPrismaRepository implements CharacterRepository {
           increment: gold,
         },
       },
+    });
+  }
+
+  async updateCharacterProgress(
+    characterId: string,
+    actualExperience: number,
+  ): Promise<any> {
+    return await this.prisma.characterProgress.update({
+      where: {
+        characterId,
+      },
+      data: {
+        actualExperience,
+      },
+    });
+  }
+
+  async updateCharacterLvl(
+    characterId: string,
+    characterProgressId: string,
+    lvl: number,
+    actualExperience: number,
+  ) {
+    await this.prisma.$transaction(async (tx) => {
+      await tx.character.update({
+        where: {
+          id: characterId,
+        },
+        data: {
+          lvl: lvl,
+        },
+      });
+
+      await tx.characterProgress.update({
+        where: {
+          id: characterProgressId,
+        },
+        data: {
+          actualExperience,
+          toNextLvl: 40 * lvl ** 2,
+        },
+      });
     });
   }
 }

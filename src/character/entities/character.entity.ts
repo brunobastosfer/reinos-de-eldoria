@@ -1,4 +1,5 @@
 import { CharacterBooster } from '../../booster/entities/character-booster.entity';
+import { Progress } from './characterProgress.entity';
 
 export class Character {
   id: string;
@@ -10,8 +11,8 @@ export class Character {
   magic: number;
   stamina: number;
   lvl: number;
-  actualExperience: number;
   accountId: string;
   classeId: string;
   boosters?: CharacterBooster[];
+  progress?: Progress | null;
 }

@@ -42,6 +42,8 @@ enum SkillUtilityType {
   STUN // O inimigo ficará 1 round sem se movimentar / atacar.
   SNARE // Encanta o inimigo e o mesmo não pode usar magia / porção.
   FEAR // Amedronta o inimigo e reduz a armadura.
+  BUFF // Aumenta seu ataque
+  DBUFF // Diminui a defesa do inimigo
 }
 
 enum skillType {
@@ -68,6 +70,14 @@ enum BoostType {
   EXPERIENCE
   TRAINER
   LUCKY
+}
+
+enum CharacterStatus {
+  BLOCKED // Penalizado por fugir da luta.
+  BANISHED // Banido por matar players demais ex.
+  TRAINING // Treinando skill attribute.
+  TRAVELING // Viajando para outra cidade.
+  IN_MISSION // Executando uma missão.
 }
 
 model User {
@@ -184,31 +194,32 @@ model SkillValue {
 }
 
 model Character {
-  id               String              @id @default(uuid())
-  nickname         String
-  mana             Int
-  life             Int
-  damage           Int
-  nivelAttribute   Int                 @map("nivel_attribute")
-  defense          Int
-  magic            Int
-  stamina          Int
-  lvl              Int
-  actualExperience Float               @map("actual_experience")
-  reputation       Int                 @default(0)
-  accountId        String              @map("account_id")
-  classeId         String              @map("classe_id")
-  gold             Int                 @default(0)
-  account          Account             @relation(fields: [accountId], references: [id])
-  classe           Classe              @relation(fields: [classeId], references: [id])
-  progress         CharacterProgress?  @relation("CharacterProgress")
-  createdAt        DateTime            @default(now()) @map("created_at")
-  updatedAt        DateTime            @updatedAt @map("updated_at")
-  deletedAt        DateTime?           @map("deleted_at")
-  inventory        Inventory?          @relation("Inventory")
-  items            Item_To_Character[]
-  DropLog          DropLog[]
-  boosters         CharacterBooster[]
+  id              String              @id @default(uuid())
+  nickname        String
+  mana            Int
+  life            Int
+  damage          Int
+  nivelAttribute  Int                 @map("nivel_attribute")
+  defense         Int
+  magic           Int
+  stamina         Int
+  lvl             Int
+  reputation      Int                 @default(0)
+  accountId       String              @map("account_id")
+  classeId        String              @map("classe_id")
+  gold            Int                 @default(0)
+  status          CharacterStatus?
+  account         Account             @relation(fields: [accountId], references: [id])
+  classe          Classe              @relation(fields: [classeId], references: [id])
+  progress        CharacterProgress?  @relation("CharacterProgress")
+  inventory       Inventory?          @relation("Inventory")
+  items           Item_To_Character[]
+  DropLog         DropLog[]
+  boosters        CharacterBooster[]
+  createdAt       DateTime            @default(now()) @map("created_at")
+  updatedAt       DateTime            @updatedAt @map("updated_at")
+  deletedAt       DateTime?           @map("deleted_at")
+  expiresStatusAt DateTime?           @map("expires_status_at")
 
   @@map("characters")
 }
@@ -243,6 +254,7 @@ model Monster {
   damage      Int
   experience  Int
   life        Int
+  dodge       Int
   skill       Skill[]
   MonsterDrop MonsterDrop[]
   createdAt   DateTime      @default(now()) @map("created_at")
@@ -330,6 +342,9 @@ model Item {
   defense         Int?
   rarity          RarityType
   vocation        ClasseType
+  critChance      Int?
+  dodgeChance     Int?
+  agility         Int?
   createdAt       DateTime            @default(now()) @map("created_at")
   updatedAt       DateTime            @updatedAt @map("updated_at")
   deletedAt       DateTime?           @map("deleted_at")
