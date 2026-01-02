@@ -10,6 +10,10 @@ import { ClasseModule } from './classe/classe.module';
 import { DropModule } from './drop/drop.module';
 import { ItemModule } from './item/item.module';
 import { PlanModule } from './plan/plan.module';
+import { InventoryModule } from './inventory/inventory.module';
+import { StoreModule } from './store/store.module';
+import { BlacksmithModule } from './blacksmith/blacksmith.module';
+import { BattleModule } from './battle/battle.module';
 
 @Module({
   imports: [
@@ -24,6 +28,10 @@ import { PlanModule } from './plan/plan.module';
     DropModule,
     ItemModule,
     PlanModule,
+    InventoryModule,
+    StoreModule,
+    BlacksmithModule,
+    BattleModule,
   ],
   controllers: [AppController],
   providers: [AppService],

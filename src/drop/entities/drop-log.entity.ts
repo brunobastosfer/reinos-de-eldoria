@@ -4,8 +4,9 @@ export class DropLog {
   luckApplied: number;
   playerId: string;
   monsterId: string;
-  itemId: string | null;
-  characterId: string | null;
-  itemsDropped?: string[];
+  characterId?: string | null;
+  itemId?: string | null;
+  itemTemplateIds: string[];
+  itemInstanceIds: string[];
   createdAt: Date;
 }

@@ -17,6 +17,7 @@ export class ItemPrismaRepository implements ItemRepository {
         defense: data.defense,
         rarity: data.rarity,
         vocation: data.vocation,
+        itemType: data.type,
       },
     });
   }
@@ -39,5 +40,11 @@ export class ItemPrismaRepository implements ItemRepository {
 
   async findAll(): Promise<Item[]> {
     return await this.prisma.item.findMany({});
+  }
+
+  async findTemplatesByTypeAndRarity(itemType: string, rarity: string) {
+    return this.prisma.item.findMany({
+      where: { itemType: itemType as any, rarity: rarity as any },
+    });
   }
 }

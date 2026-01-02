@@ -1,4 +1,4 @@
-import { ClasseType, RarityType } from '@prisma/client';
+import { ClasseType, ItemType, ItemRarity } from '@prisma/client';
 import { IsIn, IsInt, IsString } from 'class-validator';
 
 export class ItemCreateDto {
@@ -15,10 +15,14 @@ export class ItemCreateDto {
   defense?: number;
 
   @IsString()
-  @IsIn(['COMUM', 'INCOMUM', 'RARO', 'EPIC', 'LENDARY'])
-  rarity: RarityType;
+  @IsIn(['COMMON', 'UNCOMMON', 'RARE', 'EPIC', 'LEGENDARY'])
+  rarity: ItemRarity;
 
   @IsString()
   @IsIn(['KNIGHT', 'MAGE', 'HEALER', 'ARCHER'])
   vocation: ClasseType;
+
+  @IsString()
+  @IsIn(['LEG', 'ARMOR', 'WEAPON', 'SHIELD', 'HELMET', 'AMULET', 'RING'])
+  type: ItemType;
 }

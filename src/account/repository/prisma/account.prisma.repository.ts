@@ -40,7 +40,11 @@ export class AccountPrismaRepository implements AccountRepository {
       include: {
         account: {
           include: {
-            characters: true,
+            characters: {
+              include: {
+                inventory: true,
+              },
+            },
           },
         },
       },

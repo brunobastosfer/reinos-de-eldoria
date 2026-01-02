@@ -67,7 +67,20 @@ export class CharacterService {
         'Não há um progresso deste personagem com este ID.',
       );
     }
-    let actualExperience = character?.progress?.actualExperience + xpGain;
+
+    const hasBoosterXp = character.boosters?.find(
+      (booster) =>
+        booster.booster.type === 'EXPERIENCE' && booster.booster.isActive,
+    );
+
+    let xpGainBooster;
+
+    if (hasBoosterXp) {
+      xpGainBooster = xpGain * 2;
+    }
+
+    let actualExperience =
+      character?.progress?.actualExperience + xpGainBooster;
     let lvl = character.lvl;
 
     const xpToNextLevel = (level: number) => 40 * level ** 2;
@@ -89,7 +102,7 @@ export class CharacterService {
 
     return {
       message: levelUp
-        ? 'Parabéns, você passou de nível!'
+        ? `Parabéns, você passou do nível ${character.lvl} para o nível ${lvl}!`
         : `Você matou o ${monsterName} e ganhou ${xpGain} de xp.`,
     };
   }

@@ -6,9 +6,10 @@ import { MonsterPrismaRepository } from './repository/prisma/monster.prisma.repo
 import { DropModule } from 'src/drop/drop.module';
 import { CharacterModule } from 'src/character/character.module';
 import { PrismaService } from 'src/prisma/prisma.service';
+import { InventoryModule } from 'src/inventory/inventory.module';
 
 @Module({
-  imports: [DropModule, CharacterModule],
+  imports: [DropModule, CharacterModule, InventoryModule],
   controllers: [MonsterController],
   providers: [
     MonsterService,
