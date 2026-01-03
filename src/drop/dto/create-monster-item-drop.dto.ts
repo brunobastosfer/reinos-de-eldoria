@@ -8,8 +8,8 @@ export class CreateMonsterItemDropDto {
   itemId: string;
 
   @IsString()
-  @IsIn(['COMUM', 'INCOMUM', 'RARO', 'EPIC', 'LENDARY'])
-  rarity: 'COMUM' | 'INCOMUM' | 'RARO' | 'EPIC' | 'LENDARY';
+  @IsIn(['COMMON', 'UNCOMMON', 'RARE', 'EPIC', 'LEGENDARY'])
+  rarity: 'COMMON' | 'UNCOMMON' | 'RARE' | 'EPIC' | 'LEGENDARY';
 
   @IsNumber()
   baseChance: number;

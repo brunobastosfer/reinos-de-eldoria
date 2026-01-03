@@ -6,5 +6,5 @@ export class CharacterBooster {
   characterId: string;
   boosterId: string;
   booster: Booster;
-  character: Character;
+  character?: Character;
 }

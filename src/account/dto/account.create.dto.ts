@@ -3,7 +3,7 @@ import { IsIn, IsString } from 'class-validator';
 export class AccountCreateDto {
   @IsString()
   @IsIn(['FREE', 'PREMIUM'])
-  accountType: 'FREE' | 'PREMMIUM';
+  accountType: 'FREE' | 'PREMIUM';
 
   @IsString()
   @IsIn(['BANISHED', 'SUSPEND', 'NORMAL'])

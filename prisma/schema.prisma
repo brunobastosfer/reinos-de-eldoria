@@ -1,8 +1,6 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+// ======================================================
+// PRISMA CONFIG
+// ======================================================
 
 generator client {
   provider = "prisma-client-js"
@@ -12,6 +10,10 @@ datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
+
+// ======================================================
+// ENUMS
+// ======================================================
 
 enum AccountStatus {
   BANISHED
@@ -28,7 +30,7 @@ enum TypeSkillBenefity {
 
 enum AccountType {
   FREE
-  PREMMIUM
+  PREMIUM
 }
 
 enum ClasseType {
@@ -39,9 +41,11 @@ enum ClasseType {
 }
 
 enum SkillUtilityType {
-  STUN // O inimigo ficará 1 round sem se movimentar / atacar.
-  SNARE // Encanta o inimigo e o mesmo não pode usar magia / porção.
-  FEAR // Amedronta o inimigo e reduz a armadura.
+  STUN
+  SNARE
+  FEAR
+  BUFF
+  DBUFF
 }
 
 enum skillType {
@@ -56,12 +60,12 @@ enum Attribute {
   MAGIC
 }
 
-enum RarityType {
-  COMUM
-  INCOMUM
-  RARO
+enum ItemRarity {
+  COMMON
+  UNCOMMON
+  RARE
   EPIC
-  LENDARY
+  LEGENDARY
 }
 
 enum BoostType {
@@ -69,6 +73,28 @@ enum BoostType {
   TRAINER
   LUCKY
 }
+
+enum CharacterStatus {
+  BLOCKED
+  BANISHED
+  TRAINING
+  TRAVELING
+  IN_MISSION
+}
+
+enum ItemType {
+  LEG
+  ARMOR
+  WEAPON
+  SHIELD
+  HELMET
+  AMULET
+  RING
+}
+
+// ======================================================
+// USER / ACCOUNT
+// ======================================================
 
 model User {
   id          String    @id @default(uuid())
@@ -88,19 +114,47 @@ model User {
 }
 
 model Account {
-  id            String        @id @default(uuid())
-  accountStatus AccountStatus @map("account_status")
-  accountType   AccountType   @map("account_type")
-  createdAt     DateTime      @default(now()) @map("created_at")
-  updatedAt     DateTime      @updatedAt @map("updated_at")
-  deletedAt     DateTime?     @map("deleted_at")
+  id            String             @id @default(uuid())
+  accountStatus AccountStatus      @default(NORMAL) @map("account_status")
+  accountType   AccountType        @default(FREE) @map("account_type")
+  userId        String             @unique
+  user          User               @relation("UserAccount", fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   characters    Character[]
-
-  userId String @unique
-  user   User   @relation("UserAccount", fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  premium       PremiumToAccount[]
+  createdAt     DateTime           @default(now()) @map("created_at")
+  updatedAt     DateTime           @updatedAt @map("updated_at")
+  deletedAt     DateTime?          @map("deleted_at")
 
   @@map("accounts")
 }
+
+model PremiumAccount {
+  id      String             @id @default(uuid())
+  days    Int
+  price   Float
+  account PremiumToAccount[]
+
+  @@map("premium_account")
+}
+
+model PremiumToAccount {
+  id             String         @id @default(uuid())
+  activatedAt    DateTime       @map("activated_at")
+  expiratedAt    DateTime       @map("expirated_at")
+  accountId      String
+  premiumId      String
+  premiumAccount PremiumAccount @relation(fields: [premiumId], references: [id])
+  account        Account        @relation(fields: [accountId], references: [id])
+  createdAt      DateTime       @default(now()) @map("created_at")
+  updatedAt      DateTime       @updatedAt @map("updated_at")
+  deletedAt      DateTime?      @map("deleted_at")
+
+  @@map("premium_to_account")
+}
+
+// ======================================================
+// CLASSES / SKILLS
+// ======================================================
 
 model Classe {
   id          String      @id @default(uuid())
@@ -129,11 +183,12 @@ model Skill {
   classeId        String?           @map("class_id")
   skillValueId    String            @map("skill_value_id")
   skillBenefityId String?           @map("skill_benefity_id")
-  skillBenefity   SkillBenefity?    @relation(fields: [skillBenefityId], references: [id])
-  Classe          Classe?           @relation(fields: [classeId], references: [id])
-  value           SkillValue        @relation(fields: [skillValueId], references: [id])
-  Monster         Monster?          @relation(fields: [monsterId], references: [id])
-  monsterId       String?
+
+  skillBenefity SkillBenefity? @relation(fields: [skillBenefityId], references: [id])
+  Classe        Classe?        @relation(fields: [classeId], references: [id])
+  value         SkillValue     @relation(fields: [skillValueId], references: [id])
+  Monster       Monster?       @relation(fields: [monsterId], references: [id])
+  monsterId     String?
 
   createdAt DateTime  @default(now()) @map("created_at")
   updatedAt DateTime  @updatedAt @map("updated_at")
@@ -159,34 +214,54 @@ model SkillValue {
   @@map("skill_values")
 }
 
+// ======================================================
+// CHARACTER
+// ======================================================
+
 model Character {
-  id               String              @id @default(uuid())
-  nickname         String
-  mana             Int
-  life             Int
-  damage           Int
-  nivelAttribute   Int                 @map("nivel_attribute")
-  defense          Int
-  magic            Int
-  stamina          Int
-  lvl              Int
-  actualExperience Float               @map("actual_experience")
-  accountId        String              @map("account_id")
-  classeId         String              @map("classe_id")
-  gold             Int                 @default(0)
-  account          Account             @relation(fields: [accountId], references: [id])
-  classe           Classe              @relation(fields: [classeId], references: [id])
-  progress         CharacterProgress?  @relation("CharacterProgress")
-  createdAt        DateTime            @default(now()) @map("created_at")
-  updatedAt        DateTime            @updatedAt @map("updated_at")
-  deletedAt        DateTime?           @map("deleted_at")
-  inventory        Inventory?          @relation("Inventory")
-  items            Item_To_Character[]
-  DropLog          DropLog[]
-  boosters         CharacterBooster[]
+  id             String           @id @default(uuid())
+  nickname       String
+  mana           Int
+  life           Int
+  damage         Int
+  nivelAttribute Int              @map("nivel_attribute")
+  defense        Int
+  magic          Int
+  stamina        Int
+  lvl            Int
+  reputation     Int              @default(0)
+  accountId      String           @map("account_id")
+  classeId       String           @map("classe_id")
+  gold           Int              @default(0)
+  status         CharacterStatus?
+
+  account Account @relation(fields: [accountId], references: [id])
+  classe  Classe  @relation(fields: [classeId], references: [id])
+
+  progress               CharacterProgress?      @relation("CharacterProgress")
+  inventory              Inventory?              @relation("Inventory")
+  items                  ItemToCharacter[]
+  DropLog                DropLog[]
+  boosters               CharacterBooster[]
+  store                  Store?
+  skillCharacterProgress SkillCharacterProgress?
+  characterEquipment     CharacterEquipment?
+
+  createdAt       DateTime  @default(now()) @map("created_at")
+  updatedAt       DateTime  @updatedAt @map("updated_at")
+  deletedAt       DateTime? @map("deleted_at")
+  expiresStatusAt DateTime? @map("expires_status_at")
 
   @@map("characters")
 }
+
+// ======================================================
+// REMOVEI CharacterEquipments POIS É ANTIGO E INÚTIL
+// ======================================================
+
+// ======================================================
+// BOOSTERS
+// ======================================================
 
 model Booster {
   id          String             @id @default(uuid())
@@ -200,17 +275,22 @@ model Booster {
 }
 
 model CharacterBooster {
-  id          String    @id @default(uuid())
-  characterId String    @map("character_id")
-  boosterId   String    @map("booster_id")
-  booster     Booster   @relation(fields: [boosterId], references: [id])
-  character   Character @relation(fields: [characterId], references: [id])
+  id          String @id @default(uuid())
+  characterId String @map("character_id")
+  boosterId   String @map("booster_id")
+
+  booster   Booster   @relation(fields: [boosterId], references: [id])
+  character Character @relation(fields: [characterId], references: [id])
 
   @@map("character_booters")
 }
 
+// ======================================================
+// MONSTERS / DROPS
+// ======================================================
+
 model Monster {
-  id          String        @id @default(uuid())
+  id          String  @id @default(uuid())
   name        String
   description String?
   lvl         Int
@@ -218,113 +298,341 @@ model Monster {
   damage      Int
   experience  Int
   life        Int
+  dodge       Int
+
   skill       Skill[]
   MonsterDrop MonsterDrop[]
-  createdAt   DateTime      @default(now()) @map("created_at")
-  updatedAt   DateTime      @updatedAt @map("updated_at")
-  deletedAt   DateTime?     @map("deleted_at")
   DropLog     DropLog[]
+
+  createdAt DateTime  @default(now()) @map("created_at")
+  updatedAt DateTime  @updatedAt @map("updated_at")
+  deletedAt DateTime? @map("deleted_at")
 
   @@map("monsters")
 }
 
 model MonsterDrop {
-  id            String            @id @default(uuid())
-  minGold       Int               @default(5) @map("min_gold")
-  maxGold       Int               @default(50) @map("max_gold")
-  itemId        String?           @map("item_id")
-  monsterId     String            @unique @map("monster_id")
+  id        String  @id @default(uuid())
+  minGold   Int     @default(5) @map("min_gold")
+  maxGold   Int     @default(50) @map("max_gold")
+  itemId    String? @map("item_id")
+  monsterId String  @unique @map("monster_id")
+
   Item          Item?             @relation(fields: [itemId], references: [id])
   monster       Monster           @relation(fields: [monsterId], references: [id], onDelete: Cascade)
   possibleItems MonsterDropItem[]
-  createdAt     DateTime          @default(now()) @map("created_at")
-  updatedAt     DateTime          @updatedAt @map("updated_at")
-  deletedAt     DateTime?         @map("deleted_at")
+
+  createdAt DateTime  @default(now()) @map("created_at")
+  updatedAt DateTime  @updatedAt @map("updated_at")
+  deletedAt DateTime? @map("deleted_at")
 
   @@map("monster_drops")
 }
 
 model MonsterDropItem {
-  id            String      @id @default(uuid())
-  rarity        RarityType
-  baseChance    Float       @map("base_chance") // ex: 0.1 = 10% base chance
-  monsterDropId String      @map("monster_drop_id")
-  itemId        String      @map("item_id")
-  item          Item        @relation(fields: [itemId], references: [id])
-  monsterDrop   MonsterDrop @relation(fields: [monsterDropId], references: [id])
+  id            String     @id @default(uuid())
+  rarity        ItemRarity
+  baseChance    Float      @map("base_chance")
+  monsterDropId String     @map("monster_drop_id")
+  itemId        String     @map("item_id")
+
+  item        Item        @relation(fields: [itemId], references: [id])
+  monsterDrop MonsterDrop @relation(fields: [monsterDropId], references: [id])
+
+  minQuantity Int @default(1)
+  maxQuantity Int @default(1)
 
   @@map("monster_drop_items")
 }
 
+// ======================================================
+// DROP LOG
+// ======================================================
+
 model DropLog {
-  id           String     @id @default(uuid())
-  goldDropped  Int        @map("gold_dropped")
-  luckApplied  Float      @map("luck_applied")
-  playerId     String     @map("player_id")
-  monsterId    String     @map("monster_id")
-  itemId       String?    @map("item_id")
-  characterId  String?    @map("character_id")
-  Character    Character? @relation(fields: [characterId], references: [id])
-  Monster      Monster    @relation(fields: [monsterId], references: [id])
-  Item         Item?      @relation(fields: [itemId], references: [id])
-  itemsDropped String[]
-  createdAt    DateTime   @default(now()) @map("created_at")
+  id          String  @id @default(uuid())
+  goldDropped Int     @map("gold_dropped")
+  luckApplied Float   @map("luck_applied")
+  playerId    String  @map("player_id")
+  monsterId   String  @map("monster_id")
+  itemId      String? @map("item_id")
+  characterId String? @map("character_id")
+
+  Character Character? @relation(fields: [characterId], references: [id])
+  Monster   Monster    @relation(fields: [monsterId], references: [id])
+  Item      Item?      @relation(fields: [itemId], references: [id])
+
+  itemTemplateIds String[] @map("item_template_ids")
+  itemInstanceIds String[] @map("item_instance_ids")
+
+  createdAt DateTime @default(now()) @map("created_at")
 
   @@map("drop_logs")
 }
 
+// ======================================================
+// CHARACTER PROGRESS
+// ======================================================
+
 model CharacterProgress {
-  id               String    @id @default(uuid())
-  actualExperience Float     @map("actual_experience")
-  toNextLvl        Float     @map("to_next_lvl")
-  characterId      String    @unique @map("character_id")
-  character        Character @relation("CharacterProgress", fields: [characterId], references: [id])
-  createdAt        DateTime  @default(now()) @map("created_at")
-  updatedAt        DateTime  @updatedAt @map("updated_at")
-  deletedAt        DateTime? @map("deleted_at")
+  id               String @id @default(uuid())
+  actualExperience Float  @map("actual_experience")
+  toNextLvl        Float  @map("to_next_lvl")
+  characterId      String @unique @map("character_id")
+
+  character Character @relation("CharacterProgress", fields: [characterId], references: [id])
+
+  createdAt DateTime  @default(now()) @map("created_at")
+  updatedAt DateTime  @updatedAt @map("updated_at")
+  deletedAt DateTime? @map("deleted_at")
 
   @@map("characters_progresses")
 }
 
+model SkillCharacterProgress {
+  id          String    @id @default(uuid())
+  characterId String    @unique @map("character_id")
+  skillType   Attribute
+  level       Int       @default(0)
+  experience  Float     @default(0)
+  toNextLevel Float
+
+  character Character @relation(fields: [characterId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime  @default(now()) @map("created_at")
+  updatedAt DateTime  @updatedAt @map("updated_at")
+  deletedAt DateTime? @map("deleted_at")
+
+  @@map("skills_character_progress")
+}
+
+// ======================================================
+// INVENTORY
+// ======================================================
+
 model Inventory {
-  id          String     @id @default(uuid())
-  characterId String     @unique @map("character_id")
-  character   Character? @relation("Inventory", fields: [characterId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  createdAt   DateTime   @default(now()) @map("created_at")
-  updatedAt   DateTime   @updatedAt @map("updated_at")
-  deletedAt   DateTime?  @map("deleted_at")
+  id          String @id @default(uuid())
+  characterId String @unique @map("character_id")
+
+  character Character? @relation("Inventory", fields: [characterId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+
+  baseSlots  Int @default(25)
+  extraSlots Int @default(0)
+
+  instances ItemInstance[]
+  stacks    ItemStack[]
+
+  createdAt DateTime  @default(now()) @map("created_at")
+  updatedAt DateTime  @updatedAt @map("updated_at")
+  deletedAt DateTime? @map("deleted_at")
 
   @@map("invetories")
 }
 
+// ======================================================
+// ITEMS
+// ======================================================
+
 model Item {
-  id              String              @id @default(uuid())
-  name            String
-  description     String?
-  attack          Int?
-  defense         Int?
-  rarity          RarityType
-  vocation        ClasseType
-  createdAt       DateTime            @default(now()) @map("created_at")
-  updatedAt       DateTime            @updatedAt @map("updated_at")
-  deletedAt       DateTime?           @map("deleted_at")
-  characters      Item_To_Character[]
+  id            String      @id @default(uuid())
+  name          String
+  description   String?
+  attack        Int?
+  defense       Int?
+  rarity        ItemRarity
+  vocation      ClasseType?
+  itemType      ItemType    @map("item_type")
+  critChance    Int?
+  dodgeChance   Int?
+  agility       Int?
+  stackCategory String?
+  stackable     Boolean     @default(false)
+  craftable     Boolean     @default(false)
+  price         Int?
+  sellPrice     Int?
+
+  characters      ItemToCharacter[]
   monsters        MonsterDrop[]
   DropLog         DropLog[]
   MonsterDropItem MonsterDropItem[]
+  instances       ItemInstance[]
+  stacks          ItemStack[]
+  storeItems      StoreItem[]
+
+  createdAt DateTime  @default(now()) @map("created_at")
+  updatedAt DateTime  @updatedAt @map("updated_at")
+  deletedAt DateTime? @map("deleted_at")
 
   @@map("items")
 }
 
-model Item_To_Character {
-  id          String    @id @default(uuid())
-  characterId String    @map("character_id")
-  itemId      String    @map("item_id")
-  player      Character @relation(fields: [characterId], references: [id])
-  item        Item      @relation(fields: [itemId], references: [id])
-  createdAt   DateTime  @default(now()) @map("created_at")
-  updatedAt   DateTime  @updatedAt @map("updated_at")
-  deletedAt   DateTime? @map("deleted_at")
+// ======================================================
+// ITEM INSTANCES (INSTÂNCIAS EQUIPÁVEIS)
+// ======================================================
+
+model ItemInstance {
+  id             String     @id @default(uuid())
+  templateId     String     @map("template_id")
+  inventoryId    String?    @map("inventory_id")
+  serial         String?    @unique
+  boundToAccount Boolean    @default(true)
+  level          Int        @default(1)
+  rarity         ItemRarity
+  attackBonus    Float?     @default(0)
+  durability     Int?
+  createdFrom    String?
+  equipped       Boolean    @default(false)
+
+  template  Item       @relation(fields: [templateId], references: [id])
+  inventory Inventory? @relation(fields: [inventoryId], references: [id], onDelete: SetNull)
+
+  createdAt DateTime  @default(now()) @map("created_at")
+  updatedAt DateTime  @updatedAt @map("updated_at")
+  deletedAt DateTime? @map("deleted_at")
+
+  // relações inversas (um item pode ser equipado em ZERO ou UM slot)
+  equippedWeapon CharacterEquipment? @relation("EquipWeapon")
+  equippedShield CharacterEquipment? @relation("EquipShield")
+  equippedHelmet CharacterEquipment? @relation("EquipHelmet")
+  equippedArmor  CharacterEquipment? @relation("EquipArmor")
+  equippedLeg    CharacterEquipment? @relation("EquipLeg")
+  equippedAmulet CharacterEquipment? @relation("EquipAmulet")
+  equippedRing1  CharacterEquipment? @relation("EquipRing1")
+  equippedRing2  CharacterEquipment? @relation("EquipRing2")
+  equippedBoot   CharacterEquipment? @relation("EquipBoot")
+
+  @@map("item_instances")
+}
+
+// ======================================================
+// CHARACTER EQUIPMENTS (SLOTS)
+// ======================================================
+
+model CharacterEquipment {
+  id          String @id @default(uuid())
+  characterId String @unique @map("character_id")
+
+  weaponId String? @unique @map("weapon_id")
+  shieldId String? @unique @map("shield_id")
+  helmetId String? @unique @map("helmet_id")
+  armorId  String? @unique @map("armor_id")
+  legId    String? @unique @map("leg_id")
+  amuletId String? @unique @map("amulet_id")
+  ring1Id  String? @unique @map("ring1_id")
+  ring2Id  String? @unique @map("ring2_id")
+  bootId   String? @unique @map("boot_id")
+
+  character Character @relation(fields: [characterId], references: [id])
+
+  weapon ItemInstance? @relation("EquipWeapon", fields: [weaponId], references: [id])
+  shield ItemInstance? @relation("EquipShield", fields: [shieldId], references: [id])
+  helmet ItemInstance? @relation("EquipHelmet", fields: [helmetId], references: [id])
+  armor  ItemInstance? @relation("EquipArmor", fields: [armorId], references: [id])
+  leg    ItemInstance? @relation("EquipLeg", fields: [legId], references: [id])
+  amulet ItemInstance? @relation("EquipAmulet", fields: [amuletId], references: [id])
+  ring1  ItemInstance? @relation("EquipRing1", fields: [ring1Id], references: [id])
+  ring2  ItemInstance? @relation("EquipRing2", fields: [ring2Id], references: [id])
+  boot   ItemInstance? @relation("EquipBoot", fields: [bootId], references: [id])
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("character_equipments")
+}
+
+// ======================================================
+// ITEM STACK
+// ======================================================
+
+model ItemStack {
+  id          String @id @default(uuid())
+  templateId  String @map("template_id")
+  inventoryId String @map("inventory_id")
+  quantity    Int    @default(1)
+
+  template  Item      @relation(fields: [templateId], references: [id])
+  inventory Inventory @relation(fields: [inventoryId], references: [id])
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@unique([templateId, inventoryId], name: "template_inventory_unique")
+  @@map("item_stacks")
+}
+
+// ======================================================
+// STORE
+// ======================================================
+
+model Store {
+  id          String   @id @default(uuid())
+  characterId String   @unique @map("character_id")
+  refreshedAt DateTime @default(now()) @map("refreshed_at")
+
+  items     StoreItem[]
+  character Character   @relation(fields: [characterId], references: [id])
+
+  @@map("stores")
+}
+
+model StoreItem {
+  id         String  @id @default(uuid())
+  storeId    String  @map("store_id")
+  templateId String  @map("template_id")
+  price      Int
+  purchased  Boolean @default(false)
+
+  store    Store @relation(fields: [storeId], references: [id], onDelete: Cascade)
+  template Item  @relation(fields: [templateId], references: [id])
+
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@map("store_items")
+}
+
+// ======================================================
+// CRAFT
+// ======================================================
+
+model CraftRecipe {
+  id             String @id @default(uuid())
+  resultItemId   String @map("result_item_id")
+  requiredStones Json
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("craft_recipes")
+}
+
+model BlacksmithRarityAttempt {
+  id             String     @id @default(uuid())
+  itemInstanceId String     @map("item_instance_id")
+  fromRarity     ItemRarity
+  toRarity       ItemRarity
+  success        Boolean
+  usedStoneId    String?    @map("used_stone_id")
+
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@map("blacksmith_rarity_attempts")
+}
+
+// ======================================================
+// ITEM TO CHARACTER
+// ======================================================
+
+model ItemToCharacter {
+  id          String @id @default(uuid())
+  characterId String @map("character_id")
+  itemId      String @map("item_id")
+
+  player Character @relation(fields: [characterId], references: [id])
+  item   Item      @relation(fields: [itemId], references: [id])
+
+  createdAt DateTime  @default(now()) @map("created_at")
+  updatedAt DateTime  @updatedAt @map("updated_at")
+  deletedAt DateTime? @map("deleted_at")
 
   @@map("item_to_players")
 }

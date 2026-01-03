@@ -6,4 +6,8 @@ export abstract class ItemRepository {
   abstract findByName(name: string): Promise<Item | null>;
   abstract findById(id: string): Promise<Item | null>;
   abstract findAll(): Promise<Item[]>;
+  abstract findTemplatesByTypeAndRarity(
+    itemType: string,
+    rarity: string,
+  ): Promise<any[]>;
 }

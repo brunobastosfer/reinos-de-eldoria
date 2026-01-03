@@ -43,6 +43,7 @@ export class MonsterPrismaRepository implements MonsterRepository {
         name: data.name,
         description: data.description,
         life: data.life,
+        dodge: data.dodge,
       },
     });
   }

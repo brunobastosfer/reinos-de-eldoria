@@ -1,11 +1,13 @@
-import { RarityType } from '@prisma/client';
+import { ItemRarity } from '@prisma/client';
 import { MonsterDrop } from './monster-drop.entity';
 
 export class MonsterDropItem {
   id: string;
+  rarity: ItemRarity;
+  baseChance: number;
   monsterDropId: string;
   itemId: string;
-  rarity: RarityType;
-  baseChance: number;
   monsterDrop?: MonsterDrop;
+  minQuantity: number;
+  maxQuantity: number;
 }

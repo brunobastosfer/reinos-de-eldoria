@@ -22,4 +22,7 @@ export class MonsterCreateDto {
 
   @IsInt()
   life: number;
+
+  @IsInt()
+  dodge: number;
 }

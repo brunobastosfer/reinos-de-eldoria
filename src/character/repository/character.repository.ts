@@ -9,4 +9,14 @@ export abstract class CharacterRepository {
   abstract findById(id: string): Promise<Character | null>;
   abstract update(id: string, data: UpdateCharacterDto): Promise<void>;
   abstract incrementGold(id: string, gold: number): Promise<void>;
+  abstract updateCharacterProgress(
+    characterId: string,
+    actualExperience: number,
+  ): Promise<void>;
+  abstract updateCharacterLvl(
+    characterId: string,
+    characterProgressId: string,
+    lvl: number,
+    actualExperience: number,
+  ): Promise<void>;
 }

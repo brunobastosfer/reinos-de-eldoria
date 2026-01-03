@@ -1,0 +1,3 @@
+-- AlterTable
+ALTER TABLE "invetories" ADD COLUMN     "baseSlots" INTEGER NOT NULL DEFAULT 25,
+ADD COLUMN     "extraSlots" INTEGER NOT NULL DEFAULT 0;
