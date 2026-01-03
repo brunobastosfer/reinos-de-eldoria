@@ -1,10 +1,10 @@
 // src/character-equipment/entities/character-equipment.entity.ts
+import { ItemInstance } from 'src/item/entities/item-instance.entity';
 
 export class CharacterEquipment {
   id: string;
   characterId: string;
 
-  // ItemInstance IDs (cada slot referencia um item equipado)
   weaponId?: string | null;
   shieldId?: string | null;
   helmetId?: string | null;
@@ -15,16 +15,15 @@ export class CharacterEquipment {
   ring2Id?: string | null;
   bootId?: string | null;
 
-  // Optional loaded ItemInstances (quando usar include no Prisma)
-  weapon?: any | null;
-  shield?: any | null;
-  helmet?: any | null;
-  armor?: any | null;
-  leg?: any | null;
-  amulet?: any | null;
-  ring1?: any | null;
-  ring2?: any | null;
-  boot?: any | null;
+  weapon?: ItemInstance | null;
+  shield?: ItemInstance | null;
+  helmet?: ItemInstance | null;
+  armor?: ItemInstance | null;
+  leg?: ItemInstance | null;
+  amulet?: ItemInstance | null;
+  ring1?: ItemInstance | null;
+  ring2?: ItemInstance | null;
+  boot?: ItemInstance | null;
 
   createdAt: Date;
   updatedAt: Date;

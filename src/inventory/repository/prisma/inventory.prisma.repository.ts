@@ -7,7 +7,7 @@ import { Inventario } from 'src/inventory/entities/inventory.entity';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { InventoryRepository } from '../inventory.repository';
 import { ItemStock } from 'src/item/entities/item-stock.entity';
-import { itemInstance } from 'src/item/entities/item-instance.entity';
+import { ItemInstance } from 'src/item/entities/item-instance.entity';
 import { ConsumItemStackDto } from 'src/inventory/dto/consum-item-stock.dto';
 
 @Injectable()
@@ -103,7 +103,7 @@ export class InventoryPrismaRepository implements InventoryRepository {
     inventoryId: string,
     templateId: string,
     createdFrom?: string,
-  ): Promise<itemInstance> {
+  ): Promise<ItemInstance> {
     const template = await this.prisma.item.findUnique({
       where: { id: templateId },
     });

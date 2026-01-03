@@ -23,8 +23,8 @@ export class ClasseService {
     return await this.repository.findAll();
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} class`;
+  async findOne(id: string) {
+    return await this.repository.findOne(id)
   }
 
   update(id: number, updateClassDto: UpdateClassDto) {

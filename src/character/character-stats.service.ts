@@ -1,8 +1,7 @@
 import { Injectable } from '@nestjs/common';
-import { CharacterEquipmentRepository } from './repository/character-equipment.repository ';
 import { CharacterRepository } from './repository/character.repository';
 import { ItemInstance } from 'src/item/entities/item-instance.entity';
-import { ItemTemplate } from 'src/item/entities/item-template.entity';
+import { CharacterEquipmentRepository } from './repository/character-equipment.repository ';
 
 @Injectable()
 export class CharacterStatsService {
@@ -14,6 +13,7 @@ export class CharacterStatsService {
   async recalcCharacterAttributes(characterId: string) {
     const equipment =
       await this.equipmentRepo.findByCharacterIdFull(characterId);
+
     if (!equipment) return;
 
     const equippedItems: ItemInstance[] = [
@@ -31,6 +31,7 @@ export class CharacterStatsService {
     let totalDefense = 0;
     let totalLife = 0;
     let totalMana = 0;
+
     let totalAgility = 0;
     let totalDodge = 0;
 
@@ -39,20 +40,25 @@ export class CharacterStatsService {
     let attackDistance = 0;
 
     for (const inst of equippedItems) {
-      const t: ItemTemplate = inst.template;
+      const template = inst.template;
+      if (!template) continue;
 
-      totalDefense += t.defense ?? 0;
-      totalLife += t.life ?? 0;
-      totalMana += t.mana ?? 0;
-      totalAgility += t.agility ?? 0;
-      totalDodge += t.dodgeChance ?? 0;
+      // ===== DEFESA / VIDA / MANA =====
+      totalDefense += (template.defense ?? 0) + (inst.defenseBonus ?? 0);
+      totalLife += inst.lifeBonus ?? 0;
+      totalMana += inst.manaBonus ?? 0;
 
-      attackSword += t.attack ?? 0;
-      attackMagic += t.magic ?? 0;
-      attackDistance += t.critChance ?? 0;
+      // ===== ATRIBUTOS =====
+      totalAgility += template.agility ?? 0;
+      totalDodge += template.dodgeChance ?? 0;
+
+      // ===== ATAQUE =====
+      attackSword += (template.attack ?? 0) + (inst.attackBonus ?? 0);
+      attackMagic += inst.magicBonus ?? 0;
+      attackDistance += template.critChance ?? 0; // distância pode usar crit
     }
 
-    await this.characterRepo.update(characterId, {
+    await this.characterRepo.updateStats(characterId, {
       defense: totalDefense,
       life: totalLife,
       mana: totalMana,

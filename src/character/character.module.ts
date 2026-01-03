@@ -5,9 +5,10 @@ import { PrismaService } from 'src/prisma/prisma.service';
 import { CharacterRepository } from './repository/character.repository';
 import { CharacterPrismaRepository } from './repository/prisma/character.prisma.repository';
 import { AccountModule } from 'src/account/account.module';
+import { ClasseModule } from 'src/classe/classe.module';
 
 @Module({
-  imports: [AccountModule],
+  imports: [AccountModule, ClasseModule],
   controllers: [CharacterController],
   providers: [
     CharacterService,

@@ -8,7 +8,6 @@ export class CharacterController {
 
   @Post('create')
   create(@Body() createCharacterDto: CreateCharacterDto) {
-    console.log(createCharacterDto);
     return this.service.create(createCharacterDto);
   }
 

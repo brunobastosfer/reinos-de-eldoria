@@ -9,8 +9,8 @@ import { User } from './entities/user.entity';
 import * as jwt from 'jsonwebtoken';
 import { LoginDto } from './dto/login.dto';
 import { UserCreateDto } from './dto/user.create.dto';
-import { AccountStatus, AccountType } from '@prisma/client';
 import { PremiumAccountDto } from './dto/premmium-account.dto';
+import { AccountType, AccountStatus } from '@prisma/client'
 
 @Injectable()
 export class AccountService {
@@ -71,7 +71,8 @@ export class AccountService {
     }
     try {
       await this.repository.confirm(id);
-    } catch {
+    } catch(error) {
+      console.log(error)
       throw new BadRequestException('Erro ao confirmar conta.');
     }
   }

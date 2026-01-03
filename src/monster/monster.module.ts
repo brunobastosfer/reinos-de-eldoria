@@ -16,5 +16,8 @@ import { InventoryModule } from 'src/inventory/inventory.module';
     { provide: MonsterRepository, useClass: MonsterPrismaRepository },
     PrismaService,
   ],
+  exports: [
+    MonsterService
+  ]
 })
 export class MonsterModule {}

@@ -1,8 +1,8 @@
 import { Inventario } from 'src/inventory/entities/inventory.entity';
-import { CharacterBooster } from '../../booster/entities/character-booster.entity';
 import { Progress } from './characterProgress.entity';
 import { Classe } from 'src/classe/entities/class.entity';
-import { SkillCharacterProgress } from '@prisma/client';
+import { ItemToCharacter, SkillCharacterProgress } from '@prisma/client';
+import { CharacterBooster } from '../../Booster/entities/character-booster.entity';
 
 export class Character {
   id: string;
@@ -22,4 +22,5 @@ export class Character {
   invetory?: Inventario | null;
   classe?: Classe;
   skillProgress?: SkillCharacterProgress | null;
+  items?: ItemToCharacter[];
 }

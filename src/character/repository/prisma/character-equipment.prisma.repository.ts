@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { CharacterEquipmentRepository } from '../character-equipment.repository';
+import { CharacterEquipmentRepository } from '../character-equipment.repository ';
 
 @Injectable()
 export class CharacterEquipmentPrismaRepository
@@ -30,6 +30,16 @@ export class CharacterEquipmentPrismaRepository
       },
     });
   }
+
+  async clearSlot(characterId: string, slot: string): Promise<void> {
+  await this.prisma.characterEquipment.update({
+    where: { characterId },
+    data: {
+      [slot]: null,
+    },
+  });
+}
+
 
   async findInstanceInInventory(characterId: string, instanceId: string) {
     return await this.prisma.itemInstance.findFirst({

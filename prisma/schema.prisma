@@ -90,6 +90,7 @@ enum ItemType {
   HELMET
   AMULET
   RING
+  BOOTS
 }
 
 // ======================================================
@@ -205,6 +206,20 @@ model SkillBenefity {
 
   @@map("skill_benefities")
 }
+
+model MonsterBattle {
+  id          String   @id @default(uuid())
+  characterId String
+  monsterId   String
+  currentLife Int
+
+  createdAt  DateTime @default(now())
+  finishedAt DateTime?
+
+  @@index([characterId, monsterId])
+  @@map("monster_battles")
+}
+
 
 model SkillValue {
   id    String  @id @default(uuid())
@@ -437,60 +452,75 @@ model Item {
   id            String      @id @default(uuid())
   name          String
   description   String?
+
+  requiredLevel Int         @default(1)
+
   attack        Int?
   defense       Int?
+
   rarity        ItemRarity
   vocation      ClasseType?
-  itemType      ItemType    @map("item_type")
+  itemType      ItemType
+
   critChance    Int?
   dodgeChance   Int?
   agility       Int?
+
+  canGiveLife   Boolean     @default(false)
+  canGiveMana   Boolean     @default(false)
+  canGiveMagic  Boolean     @default(false)
+
   stackCategory String?
   stackable     Boolean     @default(false)
   craftable     Boolean     @default(false)
   price         Int?
   sellPrice     Int?
 
-  characters      ItemToCharacter[]
-  monsters        MonsterDrop[]
-  DropLog         DropLog[]
-  MonsterDropItem MonsterDropItem[]
-  instances       ItemInstance[]
-  stacks          ItemStack[]
-  storeItems      StoreItem[]
+  // 🔽 RELAÇÕES INVERSAS (OBRIGATÓRIAS)
+  monsterDrops      MonsterDrop[]
+  monsterDropItems  MonsterDropItem[]
+  dropLogs          DropLog[]
+  instances         ItemInstance[]
+  stacks            ItemStack[]
+  storeItems        StoreItem[]
+  itemToCharacters  ItemToCharacter[]
 
-  createdAt DateTime  @default(now()) @map("created_at")
-  updatedAt DateTime  @updatedAt @map("updated_at")
-  deletedAt DateTime? @map("deleted_at")
-
-  @@map("items")
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
 }
+
+
+
 
 // ======================================================
 // ITEM INSTANCES (INSTÂNCIAS EQUIPÁVEIS)
 // ======================================================
 
 model ItemInstance {
-  id             String     @id @default(uuid())
-  templateId     String     @map("template_id")
-  inventoryId    String?    @map("inventory_id")
-  serial         String?    @unique
-  boundToAccount Boolean    @default(true)
-  level          Int        @default(1)
-  rarity         ItemRarity
-  attackBonus    Float?     @default(0)
-  durability     Int?
-  createdFrom    String?
-  equipped       Boolean    @default(false)
+  id          String @id @default(uuid())
+  templateId  String
+  inventoryId String?
+
+  serial      String @unique
+  createdFrom String?
+
+  level       Int @default(1)
+  durability  Int?
+
+  attackBonus  Int @default(0)
+  defenseBonus Int @default(0)
+  lifeBonus    Int @default(0)
+  manaBonus    Int @default(0)
+  magicBonus   Int @default(0)
+
+  rarity    ItemRarity
+  equipped  Boolean @default(false)
 
   template  Item       @relation(fields: [templateId], references: [id])
-  inventory Inventory? @relation(fields: [inventoryId], references: [id], onDelete: SetNull)
+  inventory Inventory? @relation(fields: [inventoryId], references: [id])
 
-  createdAt DateTime  @default(now()) @map("created_at")
-  updatedAt DateTime  @updatedAt @map("updated_at")
-  deletedAt DateTime? @map("deleted_at")
-
-  // relações inversas (um item pode ser equipado em ZERO ou UM slot)
+  // 🔽 RELAÇÕES INVERSAS DOS SLOTS
   equippedWeapon CharacterEquipment? @relation("EquipWeapon")
   equippedShield CharacterEquipment? @relation("EquipShield")
   equippedHelmet CharacterEquipment? @relation("EquipHelmet")
@@ -500,9 +530,8 @@ model ItemInstance {
   equippedRing1  CharacterEquipment? @relation("EquipRing1")
   equippedRing2  CharacterEquipment? @relation("EquipRing2")
   equippedBoot   CharacterEquipment? @relation("EquipBoot")
-
-  @@map("item_instances")
 }
+
 
 // ======================================================
 // CHARACTER EQUIPMENTS (SLOTS)

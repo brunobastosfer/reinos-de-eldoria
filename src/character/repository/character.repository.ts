@@ -1,4 +1,5 @@
 import { CreateCharacterDto } from '../dto/create-character.dto';
+import { UpdateCharacterStatsDto } from '../dto/update-character-stats.dto';
 import { UpdateCharacterDto } from '../dto/update-character.dto';
 import { Character } from '../entities/character.entity';
 
@@ -8,6 +9,10 @@ export abstract class CharacterRepository {
   abstract findAll(): Promise<Character[]>;
   abstract findById(id: string): Promise<Character | null>;
   abstract update(id: string, data: UpdateCharacterDto): Promise<void>;
+    abstract updateStats(
+    id: string,
+    data: UpdateCharacterStatsDto,
+  ): Promise<void>;
   abstract incrementGold(id: string, gold: number): Promise<void>;
   abstract updateCharacterProgress(
     characterId: string,

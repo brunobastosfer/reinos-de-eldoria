@@ -1,5 +1,5 @@
 import { BoostType } from '@prisma/client';
-import { CharacterBooster } from './character-booster.entity';
+import { CharacterBooster } from './character-booster.entity'
 
 export class Booster {
   id: string;

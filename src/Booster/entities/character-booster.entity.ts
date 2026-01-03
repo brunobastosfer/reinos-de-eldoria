@@ -1,5 +1,5 @@
 import { Character } from 'src/character/entities/character.entity';
-import { Booster } from './booster.entity';
+import { Booster } from './booster.entity'
 
 export class CharacterBooster {
   id: string;

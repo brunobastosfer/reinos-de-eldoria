@@ -6,28 +6,17 @@ import { ItemTemplate } from './item-template.entity';
  */
 export class ItemInstance {
   id: string;
-
   templateId: string;
-
-  template?: ItemTemplate;
-
   inventoryId?: string | null;
 
-  serial?: string | null;
-
-  boundToAccount: boolean;
-
-  level: number;
+  attackBonus?: number;
+  defenseBonus?: number;
+  lifeBonus?: number;
+  manaBonus?: number;
+  magicBonus?: number;
 
   rarity: string;
+  equipped: boolean;
 
-  attackBonus?: number | null;
-
-  durability?: number | null;
-
-  createdFrom?: string | null;
-
-  createdAt: Date;
-
-  updatedAt: Date;
+  template?: any;
 }

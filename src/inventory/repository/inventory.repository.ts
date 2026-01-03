@@ -4,7 +4,7 @@ import { ItemStock } from 'src/item/entities/item-stock.entity';
 import { CreateInventoryDto } from '../dto/create-inventory.dto';
 import { Inventario } from '../entities/inventory.entity';
 import { UpdateInventoryDto } from '../dto/update-inventory.dto';
-import { itemInstance } from 'src/item/entities/item-instance.entity';
+import { ItemInstance } from 'src/item/entities/item-instance.entity';
 import { ConsumItemStackDto } from '../dto/consum-item-stock.dto';
 
 /**
@@ -44,7 +44,7 @@ export abstract class InventoryRepository {
     inventoryId: string,
     templateId: string,
     createdFrom?: string,
-  ): Promise<itemInstance>;
+  ): Promise<ItemInstance>;
 
   // EXPANSÃO
   abstract incrementInventorySlots(

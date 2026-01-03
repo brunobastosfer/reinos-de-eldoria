@@ -6,6 +6,7 @@ export class Monster {
   name: string;
   description: string | null;
   lvl: number;
+  life: number;
   defense: number;
   damage: number;
   experience: number;
