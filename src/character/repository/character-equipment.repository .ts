@@ -33,4 +33,6 @@ export abstract class CharacterEquipmentRepository {
     characterId: string,
     instanceId: string,
   ): Promise<void>;
+
+  abstract findEquipmentByCharacterId(id: string): Promise<CharacterEquipment | null>
 }

@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body } from '@nestjs/common';
+import { Controller, Get, Post, Body, Param } from '@nestjs/common';
 import { CharacterService } from './character.service';
 import { CreateCharacterDto } from './dto/create-character.dto';
 
@@ -14,5 +14,12 @@ export class CharacterController {
   @Get()
   findAll() {
     return this.service.findAll();
+  }
+
+  @Get('/:id')
+  async findEquipmentsByCharacter(
+    @Param('id') id: string
+  ){
+    return await this.service.findEquipmentByCharacterId(id);
   }
 }

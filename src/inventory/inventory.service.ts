@@ -11,12 +11,15 @@ import { ExpandInventoryDto } from './dto/expand-inventory.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { CreateItemInventoryDto } from './dto/create-item-invetory.dto';
 import { ConsumItemStackDto } from './dto/consum-item-stock.dto';
+import { CharacterEquipmentService } from 'src/character/character-equipment.service';
+import { EquipItemDto } from './dto/equip-item.dto';
 
 @Injectable()
 export class InventoryService {
   constructor(
     private readonly repository: InventoryRepository,
-    private readonly prisma: PrismaService, // usado para buscar o item template
+    private readonly prisma: PrismaService,
+    private readonly equipmentService: CharacterEquipmentService,
   ) {}
 
   // ============================================================
@@ -146,6 +149,38 @@ export class InventoryService {
     return {
       success: true,
       remaining: result ? result.quantity : 0,
+    };
+  }
+
+    async equipItem(data: EquipItemDto) {
+    const inventory = await this.repository.findByCharacterId(
+      data.characterId,
+    );
+
+    if (!inventory) {
+      throw new BadRequestException('Inventário não encontrado.');
+    }
+
+    // 2️⃣ Verificar se a instância pertence ao inventário
+    const instance = await this.repository.findInstanceByIdAndInventory(
+      data.itemInstanceId,
+      inventory.id,
+    );
+
+    if (!instance) {
+      throw new BadRequestException(
+        'Este item não pertence ao inventário do personagem.',
+      );
+    }
+
+    // 3️⃣ Delegar equipar (regra de negócio)
+    await this.equipmentService.equip(data.characterId, {
+      itemInstanceId: instance.id,
+    });
+
+    return {
+      success: true,
+      message: 'Item equipado com sucesso.',
     };
   }
 }

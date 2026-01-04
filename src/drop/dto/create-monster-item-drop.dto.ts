@@ -13,4 +13,10 @@ export class CreateMonsterItemDropDto {
 
   @IsNumber()
   baseChance: number;
+
+  @IsNumber()
+  minQuantity: number;
+
+  @IsNumber()
+  maxQuantity: number;
 }

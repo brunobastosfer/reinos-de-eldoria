@@ -16,6 +16,7 @@ import { CreateItemInventoryDto } from './dto/create-item-invetory.dto';
 import { ConsumItemStackDto } from './dto/consum-item-stock.dto';
 import { ValidateCharacterIdPipe } from 'src/character/pipes/validate-character-id.pipe';
 import { ValidateTemplateIdPipe } from './pipes/validate-template-id.pipe';
+import { EquipItemDto } from './dto/equip-item.dto';
 
 @Controller('inventory')
 export class InventoryController {
@@ -63,5 +64,11 @@ export class InventoryController {
   @UsePipes(new ValidationPipe({ whitelist: true }))
   async expand(@Body() body: ExpandInventoryDto) {
     return await this.service.expandInventory(body);
+  }
+
+  @Post('equip')
+  @UsePipes(new ValidationPipe({ whitelist: true }))
+  async equipItem(@Body() body: EquipItemDto) {
+    return this.service.equipItem(body);
   }
 }

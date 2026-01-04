@@ -175,4 +175,12 @@ export class CharacterPrismaRepository implements CharacterRepository {
       });
     });
   }
+
+  async findEquipmentByCharacterId(id: string) {
+    return await this.prisma.characterEquipment.findUnique({
+      where: {
+        characterId: id
+      }
+    })
+  }
 }

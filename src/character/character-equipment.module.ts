@@ -21,8 +21,8 @@ import { CharacterEquipmentRepository } from './repository/character-equipment.r
     PrismaService,
   ],
   exports: [
-    CharacterEquipmentService, // 👈 ESSENCIAL
-    CharacterStatsService,     // 👈 ESSENCIAL
+    CharacterEquipmentService,
+    CharacterStatsService,    
   ],
 })
 export class CharacterEquipmentModule {}

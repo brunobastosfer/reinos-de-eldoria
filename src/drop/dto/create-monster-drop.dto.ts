@@ -8,9 +8,5 @@ export class CreateMonsterDropDto {
   maxGold: number;
 
   @IsString()
-  @IsOptional()
-  itemId?: string;
-
-  @IsString()
   monsterId: string;
 }

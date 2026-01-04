@@ -43,6 +43,7 @@ export class AccountPrismaRepository implements AccountRepository {
             characters: {
               include: {
                 inventory: true,
+                characterEquipment: true,
               },
             },
           },

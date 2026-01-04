@@ -13,9 +13,12 @@ export class CharacterEquipmentService {
     private readonly statsService: CharacterStatsService,
   ) {}
 
-  // ✅ NOVO: método FULL (exposto corretamente)
   async findByCharacterIdFull(characterId: string) {
-    return this.equipmentRepo.findByCharacterIdFull(characterId);
+    return await this.equipmentRepo.findByCharacterIdFull(characterId);
+  }
+
+  async findEquipmentByCharacterId(id: string) {
+    return await this.equipmentRepo.findEquipmentByCharacterId(id);
   }
 
   async equip(characterId: string, dto: { itemInstanceId: string }) {

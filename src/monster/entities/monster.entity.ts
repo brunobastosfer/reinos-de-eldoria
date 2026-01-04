@@ -15,5 +15,6 @@ export class Monster {
   createdAt: Date;
   updatedAt: Date;
   deletedAt: Date | null;
+  dodge: number;
   DropLog?: DropLog[];
 }

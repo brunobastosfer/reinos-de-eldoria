@@ -1,6 +1,7 @@
 import { CreateCharacterDto } from '../dto/create-character.dto';
 import { UpdateCharacterStatsDto } from '../dto/update-character-stats.dto';
 import { UpdateCharacterDto } from '../dto/update-character.dto';
+import { CharacterEquipment } from '../entities/character-equipment.entity';
 import { Character } from '../entities/character.entity';
 
 export abstract class CharacterRepository {
@@ -24,4 +25,5 @@ export abstract class CharacterRepository {
     lvl: number,
     actualExperience: number,
   ): Promise<void>;
+  abstract findEquipmentByCharacterId(id: string): Promise<CharacterEquipment | null>
 }

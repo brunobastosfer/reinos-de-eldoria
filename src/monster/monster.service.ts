@@ -75,6 +75,8 @@ export class MonsterService {
       );
     }
 
+    console.log("monster", monster.MonsterDrop[0])
+
     const monsterDrop = monster.MonsterDrop[0];
 
     // ------------------------------------------------------------

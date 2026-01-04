@@ -1,6 +1,7 @@
 import { ValidationPipe } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
+import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 
 async function bootstrap() {
   const port = 3000
@@ -12,6 +13,24 @@ async function bootstrap() {
       transformOptions: { enableImplicitConversion: true },
     }),
   );
+    const config = new DocumentBuilder()
+    .setTitle('Reinos de Eldoria API')
+    .setDescription(
+      'API oficial do jogo Reinos de Eldoria. Gerenciamento de contas, personagens, batalhas, monstros e progressão.',
+    )
+    .setVersion('1.0.0')
+    .addBearerAuth(
+      {
+        type: 'http',
+        scheme: 'bearer',
+        bearerFormat: 'JWT',
+      },
+      'jwt',
+    )
+    .build();
+
+  const document = SwaggerModule.createDocument(app, config);
+  SwaggerModule.setup('api', app, document);
   await app.listen(port);
   console.log("SERVIDOR RODANDO NA PORTA", port)
 }

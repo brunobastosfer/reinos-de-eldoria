@@ -36,6 +36,23 @@ export class InventoryPrismaRepository implements InventoryRepository {
     });
   }
 
+  // src/inventory/repository/prisma/inventory.prisma.repository.ts
+
+  async findInstanceByIdAndInventory(
+    itemInstanceId: string,
+    inventoryId: string,
+  ) {
+    return this.prisma.itemInstance.findFirst({
+      where: {
+        id: itemInstanceId,
+        inventoryId: inventoryId,
+      },
+      include: {
+        template: true,
+      },
+    });
+  }
+
   async updateInventory(
     id: string,
     data: UpdateInventoryDto,

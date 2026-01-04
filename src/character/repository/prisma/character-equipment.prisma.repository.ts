@@ -64,19 +64,30 @@ export class CharacterEquipmentPrismaRepository
     slot: string,
     itemInstanceId: string | null,
   ) {
-    await this.prisma.characterEquipment.update({
+    // 1️⃣ Garantir que o equipamento exista
+    await this.prisma.characterEquipment.upsert({
       where: { characterId },
-      data: { [slot]: itemInstanceId },
+      update: {
+        [slot]: itemInstanceId,
+      },
+      create: {
+        characterId,
+        [slot]: itemInstanceId,
+      },
     });
 
-    // atualizar no itemInstance
+    // 2️⃣ Atualizar o itemInstance
     if (itemInstanceId) {
       await this.prisma.itemInstance.update({
         where: { id: itemInstanceId },
-        data: { equipped: true, inventoryId: null },
+        data: {
+          equipped: true,
+          inventoryId: null,
+        },
       });
     }
   }
+
 
   async createEmptyEquipment(characterId: string) {
     return await this.prisma.characterEquipment.create({
@@ -100,5 +111,16 @@ export class CharacterEquipmentPrismaRepository
       where: { id: instanceId },
       data: { inventoryId: inventory.id },
     });
+  }
+
+  async findEquipmentByCharacterId(id: string) {
+    return await this.prisma.characterEquipment.findUnique({
+      where: {
+        characterId: id
+      },
+      include: {
+        weapon: true
+      }
+    })
   }
 }

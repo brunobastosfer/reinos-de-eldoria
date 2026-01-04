@@ -8,6 +8,8 @@ import { CharacterRepository } from './repository/character.repository';
 import { AccountService } from 'src/account/account.service';
 import { Classe } from 'src/classe/entities/class.entity';
 import { ClasseService } from 'src/classe/classe.service';
+import { CharacterEquipmentService } from './character-equipment.service';
+import { CharacterStatsService } from './character-stats.service';
 
 @Injectable()
 export class CharacterService {
@@ -15,6 +17,8 @@ export class CharacterService {
     private readonly repository: CharacterRepository,
     private readonly accountService: AccountService,
     private readonly classeService: ClasseService,
+    private readonly characterEquipmentService: CharacterEquipmentService,
+    private readonly characterStats: CharacterStatsService
   ) {}
 
   async create(createCharacterDto: CreateCharacterDto) {
@@ -86,6 +90,23 @@ export class CharacterService {
 
   async findById(id: string) {
     return await this.repository.findById(id);
+  }
+
+  async findEquipmentByCharacterId(id: string) {
+    const equipments = await this.characterEquipmentService.findEquipmentByCharacterId(id);
+    const status = await this.repository.findById(id);
+
+    return {
+      equipments,
+      status: {
+        damage: status?.damage,
+        life: status?.life,
+        mana: status?.mana,
+        magic: status?.magic,
+        defense: status?.defense,
+        nivelAttribute: status?.nivelAttribute
+      }
+    }
   }
 
   async incrementGold(id: string, gold: number) {

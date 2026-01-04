@@ -11,10 +11,14 @@ import { LoginDto } from './dto/login.dto';
 import { UserCreateDto } from './dto/user.create.dto';
 import { PremiumAccountDto } from './dto/premmium-account.dto';
 import { AccountType, AccountStatus } from '@prisma/client'
+import { CharacterEquipmentService } from 'src/character/character-equipment.service';
 
 @Injectable()
 export class AccountService {
-  constructor(private readonly repository: AccountRepository) {}
+  constructor(
+    private readonly repository: AccountRepository,
+    private readonly serviceCharacterEquipment: CharacterEquipmentService
+  ) {}
 
   async create(data: UserCreateDto) {
     const email = await this.repository.findByEmail(data.email);
@@ -56,7 +60,10 @@ export class AccountService {
     return {
       access_token: access_jwt,
       refresh_token: refresh_jwt,
-      data: await this.repository.findById(user.id),
+      data: {
+        detail: await this.repository.findById(user.id),
+        items: await this.serviceCharacterEquipment.findByCharacterIdFull(user.id)
+      }
     };
   }
 

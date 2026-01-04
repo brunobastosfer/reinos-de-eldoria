@@ -5,9 +5,10 @@ import { AccountRepository } from './repository/account.repository';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { AccountPrismaRepository } from './repository/prisma/account.prisma.repository';
 import { PlanModule } from 'src/plan/plan.module';
+import { CharacterEquipmentModule } from 'src/character/character-equipment.module';
 
 @Module({
-  imports: [PlanModule],
+  imports: [PlanModule, CharacterEquipmentModule],
   controllers: [AccountController],
   providers: [
     AccountService,

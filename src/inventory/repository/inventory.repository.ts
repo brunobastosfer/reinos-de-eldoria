@@ -46,6 +46,11 @@ export abstract class InventoryRepository {
     createdFrom?: string,
   ): Promise<ItemInstance>;
 
+  abstract findInstanceByIdAndInventory(
+    itemInstanceId: string,
+    inventoryId: string,
+  ): Promise<any | null>;
+
   // EXPANSÃO
   abstract incrementInventorySlots(
     inventoryId: string,

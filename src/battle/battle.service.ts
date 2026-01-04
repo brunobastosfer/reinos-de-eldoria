@@ -4,6 +4,7 @@ import { CharacterService } from 'src/character/character.service';
 import { MonsterService } from 'src/monster/monster.service';
 import { CharacterEquipmentService } from 'src/character/character-equipment.service';
 import { BattleRepository } from './repository/battleRepository';
+import { SkillService } from 'src/skill/skill.service';
 
 @Injectable()
 export class BattleService {
@@ -11,21 +12,17 @@ export class BattleService {
     private readonly characterService: CharacterService,
     private readonly monsterService: MonsterService,
     private readonly characterEquipmentService: CharacterEquipmentService,
-    private readonly battleRepository: BattleRepository
+    private readonly battleRepository: BattleRepository,
+    private readonly skillService: SkillService,
   ) {}
 
   async startManualBattle(dto: StartManualBattleDto) {
     const character = await this.characterService.findById(dto.characterId);
-    if (!character) {
-      throw new BadRequestException('Personagem não encontrado.');
-    }
+    if (!character) throw new BadRequestException('Personagem não encontrado.');
 
     const monster = await this.monsterService.findById(dto.monsterId);
-    if (!monster) {
-      throw new BadRequestException('Monstro não encontrado.');
-    }
+    if (!monster) throw new BadRequestException('Monstro não encontrado.');
 
-    // 🔹 Buscar ou criar estado da batalha
     let battle = await this.battleRepository.findActive(
       character.id,
       monster.id,
@@ -35,20 +32,52 @@ export class BattleService {
       battle = await this.battleRepository.create({
         characterId: character.id,
         monsterId: monster.id,
-        currentLife: monster.life, // VIDA TOTAL DO MONSTRO
+        currentLife: monster.life,
       });
     }
 
-    // 🔹 Cálculo de dano (SEU código, levemente ajustado)
     const equipment =
       await this.characterEquipmentService.findByCharacterIdFull(character.id);
 
     const weapon = equipment?.weapon;
-    const weaponDamage = weapon?.attackBonus ?? 0;
-    const baseDamage = character.damage;
-    const skillValue = character.skillProgress?.level ?? 0;
+    const weaponAttack = weapon?.template?.attack ?? 0;
 
-    let rawDamage = baseDamage + weaponDamage + skillValue;
+    const skillProgress = character.skillProgress;
+    const skillLevel = skillProgress?.level ?? 0;
+
+    // 🎯 HIT CHANCE
+    let hitChance =
+      0.6 +
+      skillLevel * 0.015 +
+      character.lvl * 0.01 -
+      monster.dodge * 0.02;
+
+    hitChance = Math.min(Math.max(hitChance, 0.1), 0.95);
+
+    const hit = Math.random() < hitChance;
+
+    // 📈 ATUALIZAR SKILL PROGRESS
+    await this.skillService.registerAttack({
+      character,
+      monster,
+      hit,
+    });
+
+    if (!hit) {
+      return {
+        hit: false,
+        message: `${character.nickname} errou o ataque!`,
+        monsterLifeRemaining: battle.currentLife,
+      };
+    }
+
+    // ⚔️ DANO BASE
+    let rawDamage =
+      character.damage +
+      weaponAttack +
+      Math.floor(skillLevel * 0.6) +
+      Math.floor(character.lvl * 0.4);
+
     rawDamage = Math.max(rawDamage - monster.defense, 0);
 
     const minHit = Math.floor(rawDamage * 0.3);
@@ -58,12 +87,9 @@ export class BattleService {
     const r2 = this.random(minHit, maxHit);
     const finalDamage = Math.max(r1, r2);
 
-    // 🔹 Subtrair vida
     const remainingLife = Math.max(battle.currentLife - finalDamage, 0);
-
     await this.battleRepository.updateLife(battle.id, remainingLife);
 
-    // ☠️ MONSTRO MORREU
     if (remainingLife <= 0) {
       await this.battleRepository.finishBattle(battle.id);
 
@@ -73,6 +99,7 @@ export class BattleService {
       });
 
       return {
+        hit: true,
         finalDamage,
         monsterDefeated: true,
         drops: result.itemsDropped,
@@ -82,12 +109,12 @@ export class BattleService {
     }
 
     return {
+      hit: true,
       finalDamage,
       monsterLifeRemaining: remainingLife,
       message: `Você causou ${finalDamage} de dano ao ${monster.name}.`,
     };
   }
-
 
   private random(min: number, max: number) {
     if (max <= min) return min;

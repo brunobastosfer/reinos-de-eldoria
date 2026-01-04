@@ -7,12 +7,14 @@ import { CharacterEquipmentModule } from 'src/character/character-equipment.modu
 import { BattleRepository } from './repository/battleRepository';
 import { BattlePrismaRepository } from './repository/prisma/battle.prisma.repository';
 import { PrismaService } from 'src/prisma/prisma.service';
+import { SkillModule } from 'src/skill/skill.module';
 
 @Module({
   imports: [
     CharacterModule, 
     MonsterModule,
-    CharacterEquipmentModule
+    CharacterEquipmentModule,
+    SkillModule
   ],
   controllers: [BattleController],
   providers: [BattleService,
