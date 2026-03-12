@@ -1,4 +1,4 @@
-import { IsIn, IsString } from 'class-validator';
+import { IsIn, IsOptional, IsString } from 'class-validator';
 
 export class AccountCreateDto {
   @IsString()
@@ -8,4 +8,8 @@ export class AccountCreateDto {
   @IsString()
   @IsIn(['BANISHED', 'SUSPEND', 'NORMAL'])
   accountStatus: 'BANISHED' | 'SUSPEND' | 'NORMAL';
+
+  @IsString()
+  @IsOptional()
+  userId: string;
 }
