@@ -11,16 +11,17 @@ import { SkillModule } from 'src/skill/skill.module';
 
 @Module({
   imports: [
-    CharacterModule, 
+    CharacterModule,
     MonsterModule,
     CharacterEquipmentModule,
-    SkillModule
+    SkillModule,
   ],
   controllers: [BattleController],
-  providers: [BattleService,
+  providers: [
+    BattleService,
     { provide: BattleRepository, useClass: BattlePrismaRepository },
-    PrismaService
+    PrismaService,
   ],
-  exports: [BattleService]
+  exports: [BattleService],
 })
 export class BattleModule {}

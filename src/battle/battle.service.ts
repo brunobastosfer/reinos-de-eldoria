@@ -47,10 +47,7 @@ export class BattleService {
 
     // 🎯 HIT CHANCE
     let hitChance =
-      0.6 +
-      skillLevel * 0.015 +
-      character.lvl * 0.01 -
-      monster.dodge * 0.02;
+      0.6 + skillLevel * 0.015 + character.lvl * 0.01 - monster.dodge * 0.02;
 
     hitChance = Math.min(Math.max(hitChance, 0.1), 0.95);
 
