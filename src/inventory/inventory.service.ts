@@ -152,10 +152,8 @@ export class InventoryService {
     };
   }
 
-    async equipItem(data: EquipItemDto) {
-    const inventory = await this.repository.findByCharacterId(
-      data.characterId,
-    );
+  async equipItem(data: EquipItemDto) {
+    const inventory = await this.repository.findByCharacterId(data.characterId);
 
     if (!inventory) {
       throw new BadRequestException('Inventário não encontrado.');

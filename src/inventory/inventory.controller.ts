@@ -71,4 +71,10 @@ export class InventoryController {
   async equipItem(@Body() body: EquipItemDto) {
     return this.service.equipItem(body);
   }
+
+  @Post('unequip')
+  @UsePipes(new ValidationPipe({ whitelist: true }))
+  async uniquipItem(@Body() body: EquipItemDto) {
+    return this.service.equipItem(body);
+  }
 }

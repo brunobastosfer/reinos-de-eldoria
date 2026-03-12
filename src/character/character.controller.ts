@@ -17,9 +17,7 @@ export class CharacterController {
   }
 
   @Get('/:id')
-  async findEquipmentsByCharacter(
-    @Param('id') id: string
-  ){
+  async findEquipmentsByCharacter(@Param('id') id: string) {
     return await this.service.findEquipmentByCharacterId(id);
   }
 }

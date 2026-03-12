@@ -1,0 +1,18 @@
+version: "3.9"
+
+services:
+  eldoria-api:
+    container_name: eldoria-api
+    build: .
+    restart: always
+
+    ports:
+      - "3000:3000"
+
+    env_file:
+      - .env
+
+    environment:
+      NODE_ENV: production
+
+    command: sh -c "npx prisma generate && node dist/main"
