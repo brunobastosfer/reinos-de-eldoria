@@ -25,7 +25,6 @@ export class AccountController {
   //TODO: Criar de integração com api de email para o usuário validar email.
   @Post('/confirm')
   async confirm(@Body() id: any) {
-    console.log("id", id)
     await this.accountService.confirm(id.id);
     return {
       message: 'Conta confirmada com sucesso.',

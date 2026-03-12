@@ -10,14 +10,14 @@ import * as jwt from 'jsonwebtoken';
 import { LoginDto } from './dto/login.dto';
 import { UserCreateDto } from './dto/user.create.dto';
 import { PremiumAccountDto } from './dto/premmium-account.dto';
-import { AccountType, AccountStatus } from '@prisma/client'
+import { AccountType, AccountStatus } from '@prisma/client';
 import { CharacterEquipmentService } from 'src/character/character-equipment.service';
 
 @Injectable()
 export class AccountService {
   constructor(
     private readonly repository: AccountRepository,
-    private readonly serviceCharacterEquipment: CharacterEquipmentService
+    private readonly serviceCharacterEquipment: CharacterEquipmentService,
   ) {}
 
   async create(data: UserCreateDto) {
@@ -62,8 +62,10 @@ export class AccountService {
       refresh_token: refresh_jwt,
       data: {
         detail: await this.repository.findById(user.id),
-        items: await this.serviceCharacterEquipment.findByCharacterIdFull(user.id)
-      }
+        items: await this.serviceCharacterEquipment.findByCharacterIdFull(
+          user.id,
+        ),
+      },
     };
   }
 
@@ -78,8 +80,8 @@ export class AccountService {
     }
     try {
       await this.repository.confirm(id);
-    } catch(error) {
-      console.log(error)
+    } catch (error) {
+      console.log(error);
       throw new BadRequestException('Erro ao confirmar conta.');
     }
   }

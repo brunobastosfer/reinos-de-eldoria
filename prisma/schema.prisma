@@ -122,6 +122,7 @@ model Account {
   user          User               @relation("UserAccount", fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   characters    Character[]
   premium       PremiumToAccount[]
+  isAdmin       Boolean            @default(false)
   createdAt     DateTime           @default(now()) @map("created_at")
   updatedAt     DateTime           @updatedAt @map("updated_at")
   deletedAt     DateTime?          @map("deleted_at")
@@ -208,18 +209,17 @@ model SkillBenefity {
 }
 
 model MonsterBattle {
-  id          String   @id @default(uuid())
+  id          String @id @default(uuid())
   characterId String
   monsterId   String
   currentLife Int
 
-  createdAt  DateTime @default(now())
+  createdAt  DateTime  @default(now())
   finishedAt DateTime?
 
   @@index([characterId, monsterId])
   @@map("monster_battles")
 }
-
 
 model SkillValue {
   id    String  @id @default(uuid())
@@ -449,64 +449,61 @@ model Inventory {
 // ======================================================
 
 model Item {
-  id            String      @id @default(uuid())
-  name          String
-  description   String?
+  id          String  @id @default(uuid())
+  name        String
+  description String?
 
-  requiredLevel Int         @default(1)
+  requiredLevel Int @default(1)
 
-  attack        Int?
-  defense       Int?
+  attack  Int?
+  defense Int?
 
-  rarity        ItemRarity
-  vocation      ClasseType?
-  itemType      ItemType
+  rarity   ItemRarity
+  vocation ClasseType?
+  itemType ItemType
 
-  critChance    Int?
-  dodgeChance   Int?
-  agility       Int?
+  critChance  Int?
+  dodgeChance Int?
+  agility     Int?
 
-  canGiveLife   Boolean     @default(false)
-  canGiveMana   Boolean     @default(false)
-  canGiveMagic  Boolean     @default(false)
+  canGiveLife  Boolean @default(false)
+  canGiveMana  Boolean @default(false)
+  canGiveMagic Boolean @default(false)
 
   stackCategory String?
-  stackable     Boolean     @default(false)
-  craftable     Boolean     @default(false)
+  stackable     Boolean @default(false)
+  craftable     Boolean @default(false)
   price         Int?
   sellPrice     Int?
 
   // 🔽 RELAÇÕES INVERSAS (OBRIGATÓRIAS)
-  monsterDrops      MonsterDrop[]
-  monsterDropItems  MonsterDropItem[]
-  dropLogs          DropLog[]
-  instances         ItemInstance[]
-  stacks            ItemStack[]
-  storeItems        StoreItem[]
-  itemToCharacters  ItemToCharacter[]
+  monsterDrops     MonsterDrop[]
+  monsterDropItems MonsterDropItem[]
+  dropLogs         DropLog[]
+  instances        ItemInstance[]
+  stacks           ItemStack[]
+  storeItems       StoreItem[]
+  itemToCharacters ItemToCharacter[]
 
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
   deletedAt DateTime?
 }
 
-
-
-
 // ======================================================
 // ITEM INSTANCES (INSTÂNCIAS EQUIPÁVEIS)
 // ======================================================
 
 model ItemInstance {
-  id          String @id @default(uuid())
+  id          String  @id @default(uuid())
   templateId  String
   inventoryId String?
 
-  serial      String @unique
+  serial      String  @unique
   createdFrom String?
 
-  level       Int @default(1)
-  durability  Int?
+  level      Int  @default(1)
+  durability Int?
 
   attackBonus  Int @default(0)
   defenseBonus Int @default(0)
@@ -514,8 +511,8 @@ model ItemInstance {
   manaBonus    Int @default(0)
   magicBonus   Int @default(0)
 
-  rarity    ItemRarity
-  equipped  Boolean @default(false)
+  rarity   ItemRarity
+  equipped Boolean    @default(false)
 
   template  Item       @relation(fields: [templateId], references: [id])
   inventory Inventory? @relation(fields: [inventoryId], references: [id])
@@ -531,7 +528,6 @@ model ItemInstance {
   equippedRing2  CharacterEquipment? @relation("EquipRing2")
   equippedBoot   CharacterEquipment? @relation("EquipBoot")
 }
-
 
 // ======================================================
 // CHARACTER EQUIPMENTS (SLOTS)
