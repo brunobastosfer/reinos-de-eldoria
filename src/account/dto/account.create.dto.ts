@@ -8,7 +8,4 @@ export class AccountCreateDto {
   @IsString()
   @IsIn(['BANISHED', 'SUSPEND', 'NORMAL'])
   accountStatus: 'BANISHED' | 'SUSPEND' | 'NORMAL';
-
-  @IsString()
-  userId: string;
 }

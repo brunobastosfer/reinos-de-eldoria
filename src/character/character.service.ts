@@ -18,7 +18,7 @@ export class CharacterService {
     private readonly accountService: AccountService,
     private readonly classeService: ClasseService,
     private readonly characterEquipmentService: CharacterEquipmentService,
-    private readonly characterStats: CharacterStatsService
+    private readonly characterStats: CharacterStatsService,
   ) {}
 
   async create(createCharacterDto: CreateCharacterDto) {
@@ -30,16 +30,18 @@ export class CharacterService {
         'Já existe um personagem com este nickname',
       );
     }
-    const classe = await this.classeService.findOne(createCharacterDto.classeId)
+    const classe = await this.classeService.findOne(
+      createCharacterDto.classeId,
+    );
 
-    if(!classe) {
-      throw new BadRequestException('Não existe uma classe com este ID.')
+    if (!classe) {
+      throw new BadRequestException('Não existe uma classe com este ID.');
     }
 
     const account = await this.accountService.findAccountById(
       createCharacterDto.accountId,
     );
-    
+
     if (
       account?.accountType !== 'PREMIUM' &&
       (account?.characters?.length ?? 0) >= 1
@@ -55,7 +57,7 @@ export class CharacterService {
         accountId: createCharacterDto.accountId,
         classeId: createCharacterDto.classeId,
         nickname: createCharacterDto.nickname,
-        ...baseStats
+        ...baseStats,
       });
     } catch (error) {
       console.log(error);
@@ -67,12 +69,8 @@ export class CharacterService {
 
   private calculateBaseStats(classe: Classe, level: number) {
     return {
-      life: Math.floor(
-        classe.lifeBase + classe.lifeBase * 0.12 * (level - 1),
-      ),
-      mana: Math.floor(
-        classe.manaBase + classe.manaBase * 0.1 * (level - 1),
-      ),
+      life: Math.floor(classe.lifeBase + classe.lifeBase * 0.12 * (level - 1)),
+      mana: Math.floor(classe.manaBase + classe.manaBase * 0.1 * (level - 1)),
       damage: Math.floor(
         classe.damageBase + classe.damageBase * 0.08 * (level - 1),
       ),
@@ -93,7 +91,8 @@ export class CharacterService {
   }
 
   async findEquipmentByCharacterId(id: string) {
-    const equipments = await this.characterEquipmentService.findEquipmentByCharacterId(id);
+    const equipments =
+      await this.characterEquipmentService.findEquipmentByCharacterId(id);
     const status = await this.repository.findById(id);
 
     return {
@@ -104,9 +103,9 @@ export class CharacterService {
         mana: status?.mana,
         magic: status?.magic,
         defense: status?.defense,
-        nivelAttribute: status?.nivelAttribute
-      }
-    }
+        nivelAttribute: status?.nivelAttribute,
+      },
+    };
   }
 
   async incrementGold(id: string, gold: number) {
@@ -121,22 +120,18 @@ export class CharacterService {
     const character = await this.findById(characterId);
 
     if (!character?.progress) {
-      throw new BadRequestException(
-        'Não há progresso para este personagem.',
-      );
+      throw new BadRequestException('Não há progresso para este personagem.');
     }
 
     const hasBoosterXp = character.boosters?.some(
       (booster) =>
-        booster.booster.type === 'EXPERIENCE' &&
-        booster.booster.isActive,
+        booster.booster.type === 'EXPERIENCE' && booster.booster.isActive,
     );
 
     const xpMultiplier = hasBoosterXp ? 2 : 1;
     const gainedXp = xpGain * xpMultiplier;
 
-    let actualExperience =
-      character.progress.actualExperience + gainedXp;
+    let actualExperience = character.progress.actualExperience + gainedXp;
 
     let lvl = character.lvl;
     const xpToNextLevel = (level: number) => 40 * level ** 2;
