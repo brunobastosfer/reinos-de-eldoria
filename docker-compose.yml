@@ -1,18 +1,18 @@
-version: "3.9"
-
 services:
   eldoria-api:
     container_name: eldoria-api
     build: .
     restart: always
-
     ports:
-      - "3000:3000"
-
+      - "8080:8080"
     env_file:
       - .env
-
     environment:
       NODE_ENV: production
+    networks:
+      - supabase_network
 
-    command: sh -c "npx prisma generate && node dist/main"
+networks:
+  supabase_network:
+    external: true
+    name: supabase_default
