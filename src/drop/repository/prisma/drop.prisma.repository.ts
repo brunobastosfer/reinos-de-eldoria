@@ -52,6 +52,18 @@ export class DropPrismaRepository implements DropRepository {
   }
 
   async findDropByMonsterId(id: string): Promise<MonsterDrop[]> {
-    return this.prisma.monsterDrop.findMany({ where: { monsterId: id } });
+    return this.prisma.monsterDrop.findMany({
+      where: {
+        monsterId: id,
+      },
+      include: {
+        Item: {
+          select: {
+            name: true,
+            rarity: true,
+          },
+        },
+      },
+    });
   }
 }
