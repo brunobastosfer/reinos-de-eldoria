@@ -1,25 +1,45 @@
 export abstract class BattleRepository {
-  abstract findActive(
-    characterId: string,
-    monsterId: string,
-  ): Promise<{
+  abstract findActiveByCharacter(characterId: string): Promise<{
     id: string;
-    currentLife: number;
+    characterId: string;
+    monsterId: string;
+    characterCurrentLife: number;
+    characterMaxLife: number;
+    monsterCurrentLife: number;
+    monsterMaxLife: number;
+    fleeAttempted: boolean;
+    fleeLocked: boolean;
   } | null>;
 
   abstract create(data: {
     characterId: string;
     monsterId: string;
-    currentLife: number;
+    characterCurrentLife: number;
+    characterMaxLife: number;
+    monsterCurrentLife: number;
+    monsterMaxLife: number;
   }): Promise<{
     id: string;
-    currentLife: number;
+    characterId: string;
+    monsterId: string;
+    characterCurrentLife: number;
+    characterMaxLife: number;
+    monsterCurrentLife: number;
+    monsterMaxLife: number;
+    fleeAttempted: boolean;
+    fleeLocked: boolean;
   }>;
 
-  abstract updateLife(
-    battleId: string,
-    currentLife: number,
-  ): Promise<void>;
+  abstract updateState(data: {
+    battleId: string;
+    characterCurrentLife?: number;
+    monsterCurrentLife?: number;
+    fleeAttempted?: boolean;
+    fleeLocked?: boolean;
+  }): Promise<void>;
 
-  abstract finishBattle(battleId: string): Promise<void>;
+  abstract finishBattle(data: {
+    battleId: string;
+    winner: 'CHARACTER' | 'MONSTER' | 'FLEE';
+  }): Promise<void>;
 }

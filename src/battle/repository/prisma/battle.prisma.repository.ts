@@ -6,16 +6,22 @@ import { BattleRepository } from '../battleRepository';
 export class BattlePrismaRepository implements BattleRepository {
   constructor(private readonly prisma: PrismaService) {}
 
-  async findActive(characterId: string, monsterId: string) {
+  async findActiveByCharacter(characterId: string) {
     return this.prisma.monsterBattle.findFirst({
       where: {
         characterId,
-        monsterId,
         finishedAt: null,
       },
       select: {
         id: true,
-        currentLife: true,
+        characterId: true,
+        monsterId: true,
+        characterCurrentLife: true,
+        characterMaxLife: true,
+        monsterCurrentLife: true,
+        monsterMaxLife: true,
+        fleeAttempted: true,
+        fleeLocked: true,
       },
     });
   }
@@ -23,33 +29,51 @@ export class BattlePrismaRepository implements BattleRepository {
   async create(data: {
     characterId: string;
     monsterId: string;
-    currentLife: number;
+    characterCurrentLife: number;
+    characterMaxLife: number;
+    monsterCurrentLife: number;
+    monsterMaxLife: number;
   }) {
     return this.prisma.monsterBattle.create({
-      data: {
-        characterId: data.characterId,
-        monsterId: data.monsterId,
-        currentLife: data.currentLife,
-      },
+      data,
       select: {
         id: true,
-        currentLife: true,
+        characterId: true,
+        monsterId: true,
+        characterCurrentLife: true,
+        characterMaxLife: true,
+        monsterCurrentLife: true,
+        monsterMaxLife: true,
+        fleeAttempted: true,
+        fleeLocked: true,
       },
     });
   }
 
-  async updateLife(battleId: string, currentLife: number): Promise<void> {
+  async updateState(data: {
+    battleId: string;
+    characterCurrentLife?: number;
+    monsterCurrentLife?: number;
+    fleeAttempted?: boolean;
+    fleeLocked?: boolean;
+  }): Promise<void> {
+    const { battleId, ...rest } = data;
+
     await this.prisma.monsterBattle.update({
       where: { id: battleId },
-      data: { currentLife },
+      data: rest,
     });
   }
 
-  async finishBattle(battleId: string): Promise<void> {
+  async finishBattle(data: {
+    battleId: string;
+    winner: 'CHARACTER' | 'MONSTER' | 'FLEE';
+  }): Promise<void> {
     await this.prisma.monsterBattle.update({
-      where: { id: battleId },
+      where: { id: data.battleId },
       data: {
         finishedAt: new Date(),
+        winner: data.winner,
       },
     });
   }
