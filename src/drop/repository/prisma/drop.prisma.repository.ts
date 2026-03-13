@@ -25,6 +25,7 @@ export class DropPrismaRepository implements DropRepository {
         item: {
           select: {
             name: true,
+            rarity: true,
           },
         },
         monsterDrop: true,
