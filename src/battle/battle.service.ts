@@ -18,21 +18,33 @@ export class BattleService {
 
   async startManualBattle(dto: StartManualBattleDto) {
     const character = await this.characterService.findById(dto.characterId);
-    if (!character) throw new BadRequestException('Personagem não encontrado.');
+    if (!character) {
+      throw new BadRequestException('Personagem não encontrado.');
+    }
 
     const monster = await this.monsterService.findById(dto.monsterId);
-    if (!monster) throw new BadRequestException('Monstro não encontrado.');
+    if (!monster) {
+      throw new BadRequestException('Monstro não encontrado.');
+    }
 
-    let battle = await this.battleRepository.findActive(
+    let battle = await this.battleRepository.findActiveByCharacter(
       character.id,
-      monster.id,
     );
 
-    if (!battle) {
+    if (battle) {
+      if (battle.monsterId !== monster.id) {
+        throw new BadRequestException(
+          'Você já está em uma batalha ativa com outro monstro.',
+        );
+      }
+    } else {
       battle = await this.battleRepository.create({
         characterId: character.id,
         monsterId: monster.id,
-        currentLife: monster.life,
+        characterCurrentLife: character.life,
+        characterMaxLife: character.life,
+        monsterCurrentLife: monster.life,
+        monsterMaxLife: monster.life,
       });
     }
 
@@ -45,7 +57,6 @@ export class BattleService {
     const skillProgress = character.skillProgress;
     const skillLevel = skillProgress?.level ?? 0;
 
-    // 🎯 HIT CHANCE
     let hitChance =
       0.6 + skillLevel * 0.015 + character.lvl * 0.01 - monster.dodge * 0.02;
 
@@ -53,7 +64,6 @@ export class BattleService {
 
     const hit = Math.random() < hitChance;
 
-    // 📈 ATUALIZAR SKILL PROGRESS
     await this.skillService.registerAttack({
       character,
       monster,
@@ -64,11 +74,11 @@ export class BattleService {
       return {
         hit: false,
         message: `${character.nickname} errou o ataque!`,
-        monsterLifeRemaining: battle.currentLife,
+        playerLifeRemaining: battle.characterCurrentLife,
+        monsterLifeRemaining: battle.monsterCurrentLife,
       };
     }
 
-    // ⚔️ DANO BASE
     let rawDamage =
       character.damage +
       weaponAttack +
@@ -84,11 +94,18 @@ export class BattleService {
     const r2 = this.random(minHit, maxHit);
     const finalDamage = Math.max(r1, r2);
 
-    const remainingLife = Math.max(battle.currentLife - finalDamage, 0);
-    await this.battleRepository.updateLife(battle.id, remainingLife);
+    const remainingLife = Math.max(battle.monsterCurrentLife - finalDamage, 0);
+
+    await this.battleRepository.updateState({
+      battleId: battle.id,
+      monsterCurrentLife: remainingLife,
+    });
 
     if (remainingLife <= 0) {
-      await this.battleRepository.finishBattle(battle.id);
+      await this.battleRepository.finishBattle({
+        battleId: battle.id,
+        winner: 'CHARACTER',
+      });
 
       const result = await this.monsterService.monsterDefeat({
         characterId: character.id,
@@ -101,6 +118,8 @@ export class BattleService {
         monsterDefeated: true,
         drops: result.itemsDropped,
         gold: result.goldDropped,
+        playerLifeRemaining: battle.characterCurrentLife,
+        monsterLifeRemaining: 0,
         message: `Você matou o ${monster.name}!`,
       };
     }
@@ -108,6 +127,7 @@ export class BattleService {
     return {
       hit: true,
       finalDamage,
+      playerLifeRemaining: battle.characterCurrentLife,
       monsterLifeRemaining: remainingLife,
       message: `Você causou ${finalDamage} de dano ao ${monster.name}.`,
     };
