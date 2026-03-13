@@ -5,6 +5,11 @@ import { CreateDropLogDto } from '../dto/create-drop-log.dto';
 import { CreateMonsterDropDto } from '../dto/create-monster-drop.dto';
 import { CreateMonsterItemDropDto } from '../dto/create-monster-item-drop.dto';
 
+type MonsterDropWithItems = {
+  drop: MonsterDrop;
+  items: MonsterDropItem[];
+};
+
 export abstract class DropRepository {
   abstract findMonsterDropByMonsterId(id: string): Promise<MonsterDrop | null>;
   abstract findMonsterDropItemById(id: string): Promise<MonsterDropItem | null>;
@@ -14,5 +19,7 @@ export abstract class DropRepository {
   ): Promise<MonsterDropItem>;
   abstract createDropLog(data: CreateDropLogDto): Promise<DropLog>;
   abstract findDropLogByCharacterId(id: string): Promise<DropLog[]>;
-  abstract findDropByMonsterId(id: string): Promise<MonsterDrop[]>;
+  abstract findDropByMonsterId(
+    id: string,
+  ): Promise<MonsterDropWithItems | null>;
 }

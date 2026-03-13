@@ -7,6 +7,10 @@ import { CreateMonsterItemDropDto } from 'src/drop/dto/create-monster-item-drop.
 import { DropLog } from 'src/drop/entities/drop-log.entity';
 import { CreateDropLogDto } from 'src/drop/dto/create-drop-log.dto';
 
+type MonsterDropWithItems = {
+  drop: MonsterDrop;
+  items: MonsterDropItem[];
+};
 @Injectable()
 export class DropPrismaRepository implements DropRepository {
   constructor(private readonly prisma: PrismaService) {}
@@ -51,19 +55,26 @@ export class DropPrismaRepository implements DropRepository {
     return this.prisma.dropLog.findMany({ where: { characterId: id } });
   }
 
-  async findDropByMonsterId(id: string): Promise<MonsterDrop[]> {
-    return this.prisma.monsterDrop.findMany({
+  async findDropByMonsterId(id: string): Promise<MonsterDropWithItems | null> {
+    const monsterDrop = await this.prisma.monsterDrop.findFirst({
       where: {
         monsterId: id,
       },
-      include: {
-        Item: {
-          select: {
-            name: true,
-            rarity: true,
-          },
-        },
+    });
+
+    if (!monsterDrop) {
+      return null;
+    }
+
+    const monsterItemDrop = await this.prisma.monsterDropItem.findMany({
+      where: {
+        monsterDropId: monsterDrop.id,
       },
     });
+
+    return {
+      drop: monsterDrop,
+      items: monsterItemDrop,
+    };
   }
 }
