@@ -104,7 +104,7 @@ export class BattleService {
 
     if (!battle) {
       return {
-        inAction: false,
+        inBattle: false,
         message: 'O usuário não está em nenhuma batalha',
       };
     }
@@ -113,6 +113,7 @@ export class BattleService {
 
     return {
       ...battle,
+      inBattle: false,
       monster: monster
         ? {
             id: monster.id,
