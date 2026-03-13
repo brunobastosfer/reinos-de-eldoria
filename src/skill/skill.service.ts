@@ -12,7 +12,7 @@ export class SkillService {
     if (skill) {
       return 'Já existe uma skill com esse nome.';
     }
-    this.repository.create(data);
+    await this.repository.create(data);
     return 'Skill criada com sucesso.';
   }
 
@@ -26,11 +26,20 @@ export class SkillService {
     hit: boolean;
   }) {
     const skill = character.skillCharacterProgress;
-    if (!skill) return;
+    if (!skill) {
+      return {
+        leveledUp: false,
+        previousLevel: 0,
+        currentLevel: 0,
+        experience: 0,
+        toNextLevel: 0,
+      };
+    }
+
+    const previousLevel = skill.level;
 
     const baseGain =
-      (monster.lvl / Math.max(character.lvl, 1)) *
-      (hit ? 1.2 : 0.4);
+      (monster.lvl / Math.max(character.lvl, 1)) * (hit ? 1.2 : 0.4);
 
     const gain = Math.max(0.1, baseGain);
 
@@ -50,5 +59,13 @@ export class SkillService {
       experience,
       toNextLevel: xpToNext(level),
     });
+
+    return {
+      leveledUp: level > previousLevel,
+      previousLevel,
+      currentLevel: level,
+      experience,
+      toNextLevel: xpToNext(level),
+    };
   }
 }
