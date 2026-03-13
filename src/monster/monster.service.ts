@@ -93,7 +93,12 @@ export class MonsterService {
 
     const luckMultiplier = hasLuckyBoost ? 2.0 : 1.0;
 
-    const droppedResults: { templateId: string; quantity: number }[] = [];
+    const droppedResults: {
+      templateId: string;
+      quantity: number;
+      rarity: string;
+      name: string;
+    }[] = [];
 
     if (monsterDrop.possibleItems) {
       for (const dropItem of monsterDrop.possibleItems) {
@@ -121,6 +126,8 @@ export class MonsterService {
 
           droppedResults.push({
             templateId: dropItem.itemId,
+            rarity: dropItem.rarity,
+            name: template.name,
             quantity,
           });
         }
