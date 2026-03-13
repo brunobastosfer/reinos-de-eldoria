@@ -21,7 +21,15 @@ export class DropPrismaRepository implements DropRepository {
   async findMonsterDropItemById(id: string): Promise<MonsterDropItem | null> {
     return this.prisma.monsterDropItem.findUnique({
       where: { id },
-      include: { item: true, monsterDrop: true },
+      include: {
+        item: {
+          select: {
+            name: true,
+            rarity: true,
+          },
+        },
+        monsterDrop: true,
+      },
     });
   }
 

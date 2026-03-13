@@ -22,9 +22,6 @@ import { EquipItemDto } from './dto/equip-item.dto';
 export class InventoryController {
   constructor(private readonly service: InventoryService) {}
 
-  // ============================================================
-  // CONSULTAR INVENTÁRIO
-  // ============================================================
   @Get(':characterId')
   async getInventory(
     @Param('characterId', ValidateCharacterIdPipe)
@@ -33,9 +30,6 @@ export class InventoryController {
     return this.service.getInventory(characterId);
   }
 
-  // ============================================================
-  // ADICIONAR ITEM AO INVENTÁRIO
-  // ============================================================
   @Post('add')
   @UsePipes(new ValidationPipe({ whitelist: true }))
   async addItem(
