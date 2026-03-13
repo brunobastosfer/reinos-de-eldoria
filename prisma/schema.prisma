@@ -209,15 +209,29 @@ model SkillBenefity {
 }
 
 model MonsterBattle {
-  id          String @id @default(uuid())
+  id String @id @default(uuid())
+
   characterId String
   monsterId   String
-  currentLife Int
+
+  characterCurrentLife Int?
+  characterMaxLife     Int?
+
+  monsterCurrentLife Int?
+  monsterMaxLife     Int?
+
+  fleeAttempted Boolean @default(false)
+  fleeLocked    Boolean @default(false)
+
+  winner String? // CHARACTER | MONSTER | FLEE
 
   createdAt  DateTime  @default(now())
+  updatedAt  DateTime? @updatedAt
   finishedAt DateTime?
 
-  @@index([characterId, monsterId])
+  @@index([characterId])
+  @@index([monsterId])
+  @@index([characterId, finishedAt])
   @@map("monster_battles")
 }
 
