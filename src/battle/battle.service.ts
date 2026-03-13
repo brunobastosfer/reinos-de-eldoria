@@ -103,7 +103,10 @@ export class BattleService {
       await this.battleRepository.findActiveByCharacter(characterId);
 
     if (!battle) {
-      return null;
+      return {
+        inAction: false,
+        message: 'O usuário não está em nenhuma batalha',
+      };
     }
 
     const monster = await this.monsterService.findById(battle.monsterId);
