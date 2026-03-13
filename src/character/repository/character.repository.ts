@@ -10,7 +10,7 @@ export abstract class CharacterRepository {
   abstract findAll(): Promise<Character[]>;
   abstract findById(id: string): Promise<Character | null>;
   abstract update(id: string, data: UpdateCharacterDto): Promise<void>;
-    abstract updateStats(
+  abstract updateStats(
     id: string,
     data: UpdateCharacterStatsDto,
   ): Promise<void>;
@@ -25,5 +25,7 @@ export abstract class CharacterRepository {
     lvl: number,
     actualExperience: number,
   ): Promise<void>;
-  abstract findEquipmentByCharacterId(id: string): Promise<CharacterEquipment | null>
+  abstract findEquipmentByCharacterId(
+    id: string,
+  ): Promise<CharacterEquipment | null>;
 }

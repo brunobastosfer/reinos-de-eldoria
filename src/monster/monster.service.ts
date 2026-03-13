@@ -75,8 +75,6 @@ export class MonsterService {
       );
     }
 
-    console.log("monster", monster.MonsterDrop[0])
-
     const monsterDrop = monster.MonsterDrop[0];
 
     // ------------------------------------------------------------
@@ -95,9 +93,6 @@ export class MonsterService {
 
     const luckMultiplier = hasLuckyBoost ? 2.0 : 1.0;
 
-    // ------------------------------------------------------------
-    // PROCESSAR DROP DE ITENS (rolls)
-    // ------------------------------------------------------------
     const droppedResults: { templateId: string; quantity: number }[] = [];
 
     if (monsterDrop.possibleItems) {
@@ -107,7 +102,6 @@ export class MonsterService {
         const finalChance = Math.min(chance, 1.0);
 
         if (Math.random() < finalChance) {
-          // BUSCAR TEMPLATE DO ITEM
           const template = await this.prisma.item.findUnique({
             where: { id: dropItem.itemId },
           });
@@ -133,14 +127,10 @@ export class MonsterService {
       }
     }
 
-    // ------------------------------------------------------------
-    // ADICIONAR ITENS AO INVENTÁRIO DO PLAYER (delegado ao InventoryService)
-    // ------------------------------------------------------------
     const templateIdsLog: string[] = [];
     const instanceIdsLog: string[] = [];
 
     for (const dr of droppedResults) {
-      // tipamos o resultado para evitar 'any' e acessos inseguros
       const result = (await this.inventoryService.addItemToInventory({
         characterId: character.id,
         templateId: dr.templateId,
@@ -153,26 +143,20 @@ export class MonsterService {
         destroyedCount?: number;
       };
 
-      // pilha criada ou atualizada -> log template
       if (result?.stack) {
         templateIdsLog.push(dr.templateId);
       }
 
-      // instâncias criadas -> log template + instâncias
       if (result?.instances && result.instances.length > 0) {
         templateIdsLog.push(dr.templateId);
         instanceIdsLog.push(...result.instances.map((i) => i.id));
       }
 
-      // destruído -> log template (registramos que o template participou do roll)
       if (result?.destroyed) {
         templateIdsLog.push(dr.templateId);
       }
     }
 
-    // ------------------------------------------------------------
-    // CALCULAR GOLD
-    // ------------------------------------------------------------
     const gold = this.getGoldDrop(
       monsterDrop.minGold,
       monsterDrop.maxGold,
@@ -181,9 +165,6 @@ export class MonsterService {
 
     await this.characterService.incrementGold(character.id, gold);
 
-    // ------------------------------------------------------------
-    // CRIAR DROP LOG (usar DTO atualizado)
-    // ------------------------------------------------------------
     const dropLogDto: CreateDropLogDto = {
       goldDropped: gold,
       luckApplied: luckMultiplier,
@@ -196,9 +177,6 @@ export class MonsterService {
 
     await this.dropService.createDropLog(dropLogDto);
 
-    // ------------------------------------------------------------
-    // XP E MENSAGEM DE NIVEL
-    // ------------------------------------------------------------
     const xpMsg = await this.characterService.updateCharacterProgress(
       character.id,
       monster.experience,

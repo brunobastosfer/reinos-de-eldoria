@@ -22,16 +22,10 @@ export class InventoryService {
     private readonly equipmentService: CharacterEquipmentService,
   ) {}
 
-  // ============================================================
-  // CRIAR INVENTÁRIO
-  // ============================================================
   async createInventory(data: CreateInventoryDto) {
     return this.repository.create(data);
   }
 
-  // ============================================================
-  // BUSCAR INVENTÁRIO DO PERSONAGEM
-  // ============================================================
   async getInventory(characterId: string) {
     const inv = await this.repository.findByCharacterId(characterId);
 
@@ -42,18 +36,12 @@ export class InventoryService {
     return inv;
   }
 
-  // ============================================================
-  // VERIFICAR SE HÁ ESPAÇO PARA ITEM NOVO
-  // ============================================================
   private async hasSlotAvailable(inventoryId: string, extraSlots: number) {
     const used = await this.repository.countUsedSlots(inventoryId);
     const limit = 25 + (extraSlots ?? 0);
     return used < limit;
   }
 
-  // ============================================================
-  // ADICIONAR ITEM AO INVENTÁRIO (LÓGICA 100% AQUI)
-  // ============================================================
   async addItemToInventory(data: CreateItemInventoryDto) {
     const inventory = await this.getInventory(data.characterId);
 
@@ -64,13 +52,9 @@ export class InventoryService {
     if (!template)
       throw new BadRequestException('Template do item é inválido.');
 
-    // ------------------------------------------------------------
-    // ITEM EMPILHÁVEL
-    // ------------------------------------------------------------
     if (template.stackable) {
       const stack = await this.repository.findStack(inventory.id, template.id);
 
-      // Se já existe pilha do MESMO template → empilha
       if (stack) {
         const newQuantity = stack.quantity + 1;
 
@@ -84,7 +68,6 @@ export class InventoryService {
         };
       }
 
-      // Se não existe pilha → precisa de slot
       const hasSlot = await this.hasSlotAvailable(
         inventory.id,
         inventory.extraSlots ?? 0,
@@ -97,7 +80,6 @@ export class InventoryService {
         };
       }
 
-      // Criar nova pilha
       const newStack = await this.repository.createStack(
         inventory.id,
         template.id,
@@ -106,9 +88,6 @@ export class InventoryService {
       return { stack: newStack };
     }
 
-    // ------------------------------------------------------------
-    // ITEM NÃO EMPILHÁVEL
-    // ------------------------------------------------------------
     const hasSlot = await this.hasSlotAvailable(
       inventory.id,
       inventory.extraSlots ?? 0,
@@ -121,7 +100,6 @@ export class InventoryService {
       };
     }
 
-    // Criar instância
     const instance = await this.repository.createInstance(
       inventory.id,
       template.id,
@@ -131,9 +109,6 @@ export class InventoryService {
     return { instance };
   }
 
-  // ============================================================
-  // EXPANDIR INVENTÁRIO
-  // ============================================================
   async expandInventory(data: ExpandInventoryDto) {
     return await this.repository.incrementInventorySlots(
       data.characterId,
@@ -141,9 +116,6 @@ export class InventoryService {
     );
   }
 
-  // ============================================================
-  // CONSUMIR PILHA
-  // ============================================================
   async consumeStack(data: ConsumItemStackDto) {
     const result = await this.repository.consumeStack(data);
     return {
@@ -159,7 +131,6 @@ export class InventoryService {
       throw new BadRequestException('Inventário não encontrado.');
     }
 
-    // 2️⃣ Verificar se a instância pertence ao inventário
     const instance = await this.repository.findInstanceByIdAndInventory(
       data.itemInstanceId,
       inventory.id,
@@ -171,7 +142,6 @@ export class InventoryService {
       );
     }
 
-    // 3️⃣ Delegar equipar (regra de negócio)
     await this.equipmentService.equip(data.characterId, {
       itemInstanceId: instance.id,
     });
