@@ -103,7 +103,10 @@ export class CharacterService {
         mana: status?.mana,
         magic: status?.magic,
         defense: status?.defense,
-        nivelAttribute: status?.nivelAttribute,
+        nivelAttribute: status?.skillProgress?.level,
+        skillProgressExperience: status?.skillProgress?.experience,
+        skillProgressToNextLevel: status?.skillProgress?.toNextLevel,
+        stamina: status?.stamina,
       },
     };
   }
