@@ -1,0 +1,5 @@
+-- AlterEnum
+ALTER TYPE "ItemType" ADD VALUE 'CONSUMABLE';
+
+-- AlterTable
+ALTER TABLE "skills" ADD COLUMN     "skillScaling" DOUBLE PRECISION NOT NULL DEFAULT 0.5;

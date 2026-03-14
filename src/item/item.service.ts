@@ -9,7 +9,6 @@ export class ItemService {
 
   async create(data: ItemCreateDto): Promise<Item> {
     const item = await this.repository.findByName(data.name);
-    console.log(item);
     if (item) {
       throw new BadRequestException('Já existe um item com este nome');
     }

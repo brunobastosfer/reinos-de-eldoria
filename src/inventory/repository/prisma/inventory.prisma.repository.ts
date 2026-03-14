@@ -31,7 +31,15 @@ export class InventoryPrismaRepository implements InventoryRepository {
       where: { characterId },
       include: {
         stacks: true,
-        instances: true,
+        instances: {
+          select: {
+            template: {
+              include: {
+                stacks: true,
+              },
+            },
+          },
+        },
       },
     });
   }

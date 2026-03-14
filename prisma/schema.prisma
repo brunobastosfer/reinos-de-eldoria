@@ -91,6 +91,7 @@ enum ItemType {
   AMULET
   RING
   BOOTS
+  CONSUMABLE
 }
 
 // ======================================================
@@ -182,6 +183,7 @@ model Skill {
   mana            Int
   type            skillType
   utility         SkillUtilityType?
+  skillScaling    Float             @default(0.5)
   classeId        String?           @map("class_id")
   skillValueId    String            @map("skill_value_id")
   skillBenefityId String?           @map("skill_benefity_id")

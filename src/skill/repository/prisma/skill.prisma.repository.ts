@@ -49,6 +49,19 @@ export class SkillPrismaRepository implements SkillRepository {
     });
   }
 
+  async findSkillById(id: string) {
+    return await this.prisma.skill.findFirst({
+      where: {
+        id,
+        deletedAt: null,
+      },
+      include: {
+        value: true,
+        skillBenefity: true,
+      },
+    });
+  }
+
   async updateSkillProgress(data: {
     id: string;
     level: number;
