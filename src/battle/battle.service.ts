@@ -95,6 +95,24 @@ export class BattleService {
       return this.tryFlee({ battle, character, monster });
     }
 
+    if (dto.action === 'USE_POTION') {
+      return this.usePotionTurn({
+        battle,
+        character,
+        monster,
+        itemId: dto.itemId,
+      });
+    }
+
+    if (dto.action === 'USE_SKILL') {
+      return this.useSkillTurn({
+        battle,
+        character,
+        monster,
+        skillId: dto.skillId,
+      });
+    }
+
     throw new BadRequestException('Ação inválida.');
   }
 
@@ -125,6 +143,275 @@ export class BattleService {
             dodge: monster.dodge,
           }
         : null,
+    };
+  }
+
+  private async useSkillTurn({
+    battle,
+    character,
+    monster,
+    skillId,
+  }: {
+    battle: {
+      id: string;
+      characterId: string;
+      monsterId: string;
+      characterCurrentLife: number;
+      characterMaxLife: number;
+      monsterCurrentLife: number;
+      monsterMaxLife: number;
+      fleeAttempted: boolean;
+      fleeLocked: boolean;
+    };
+    character: any;
+    monster: any;
+    skillId?: string;
+  }) {
+    if (!skillId) {
+      throw new BadRequestException(
+        'skillId é obrigatório para usar habilidade.',
+      );
+    }
+
+    // Quando você tiver o registro real:
+    // const skill = await this.skillService.findById(skillId);
+    // if (!skill) {
+    //   throw new BadRequestException('Habilidade não encontrada.');
+    // }
+
+    // Exemplo temporário para teste
+    const skill = {
+      id: skillId,
+      name: 'Power Strike',
+      multiplier: 1.8,
+      manaCost: 10,
+      hitBonus: 0.1,
+    };
+
+    if ((character.mana ?? 0) < skill.manaCost) {
+      throw new BadRequestException(
+        'Mana insuficiente para usar esta habilidade.',
+      );
+    }
+
+    let skillHitChance =
+      0.6 +
+      (character.lvl ?? 0) * 0.01 +
+      skill.hitBonus -
+      (monster.dodge ?? 0) * 0.02;
+
+    skillHitChance = Math.min(Math.max(skillHitChance, 0.1), 0.95);
+
+    const hit = Math.random() < skillHitChance;
+
+    const logs: string[] = [];
+    let monsterLifeRemaining = battle.monsterCurrentLife;
+    let playerLifeRemaining = battle.characterCurrentLife;
+    let finalDamage = 0;
+
+    // Se você tiver persistência de mana no personagem, atualize aqui
+    // await this.characterService.consumeMana(character.id, skill.manaCost);
+
+    if (!hit) {
+      logs.push(
+        `${character.nickname} usou ${skill.name}, mas errou o ataque.`,
+      );
+    } else {
+      let rawDamage =
+        Math.floor(
+          (character.damage + Math.floor(character.lvl * 0.5)) *
+            skill.multiplier,
+        ) - monster.defense;
+
+      rawDamage = Math.max(rawDamage, 0);
+
+      const minHit = Math.floor(rawDamage * 0.4);
+      const maxHit = rawDamage;
+
+      const r1 = this.random(minHit, maxHit);
+      const r2 = this.random(minHit, maxHit);
+      finalDamage = Math.max(r1, r2);
+
+      monsterLifeRemaining = Math.max(
+        battle.monsterCurrentLife - finalDamage,
+        0,
+      );
+
+      await this.battleRepository.updateState({
+        battleId: battle.id,
+        monsterCurrentLife: monsterLifeRemaining,
+      });
+
+      logs.push(
+        `${character.nickname} usou ${skill.name} e causou ${finalDamage} de dano em ${monster.name}.`,
+      );
+    }
+
+    if (monsterLifeRemaining <= 0) {
+      await this.battleRepository.finishBattle({
+        battleId: battle.id,
+        winner: 'CHARACTER',
+      });
+
+      const result = await this.monsterService.monsterDefeat({
+        characterId: character.id,
+        monsterId: monster.id,
+      });
+
+      logs.push(`Você matou o ${monster.name}!`);
+
+      return {
+        action: 'USE_SKILL',
+        usedSkillId: skillId,
+        hit,
+        finalDamage,
+        monsterDefeated: true,
+        playerDefeated: false,
+        drops: result.itemsDropped,
+        gold: result.goldDropped,
+        playerLifeRemaining,
+        monsterLifeRemaining: 0,
+        message: logs.join(' '),
+        logs,
+      };
+    }
+
+    const monsterAttackResult = await this.monsterAttack({
+      battleId: battle.id,
+      battleCharacterCurrentLife: playerLifeRemaining,
+      character,
+      monster,
+    });
+
+    playerLifeRemaining = monsterAttackResult.playerLifeRemaining;
+    logs.push(monsterAttackResult.message);
+
+    if (monsterAttackResult.playerDefeated) {
+      await this.battleRepository.finishBattle({
+        battleId: battle.id,
+        winner: 'MONSTER',
+      });
+
+      logs.push(`${character.nickname} foi derrotado por ${monster.name}.`);
+    }
+
+    return {
+      action: 'USE_SKILL',
+      usedSkillId: skillId,
+      hit,
+      finalDamage,
+      monsterHit: monsterAttackResult.hit,
+      monsterDamage: monsterAttackResult.damage,
+      monsterDefeated: false,
+      playerDefeated: monsterAttackResult.playerDefeated,
+      playerLifeRemaining,
+      monsterLifeRemaining,
+      message: logs.join(' '),
+      logs,
+    };
+  }
+
+  private async usePotionTurn({
+    battle,
+    character,
+    monster,
+    itemId,
+  }: {
+    battle: {
+      id: string;
+      characterId: string;
+      monsterId: string;
+      characterCurrentLife: number;
+      characterMaxLife: number;
+      monsterCurrentLife: number;
+      monsterMaxLife: number;
+      fleeAttempted: boolean;
+      fleeLocked: boolean;
+    };
+    character: any;
+    monster: any;
+    itemId?: string;
+  }) {
+    if (!itemId) {
+      throw new BadRequestException('itemId é obrigatório para usar poção.');
+    }
+
+    // Exemplo: buscar item no inventário do personagem
+    // const inventoryItem = await this.characterInventoryService.findByCharacterAndItem({
+    //   characterId: character.id,
+    //   itemId,
+    // });
+
+    // if (!inventoryItem || inventoryItem.quantity <= 0) {
+    //   throw new BadRequestException('Poção não encontrada no inventário.');
+    // }
+
+    // Exemplo mock temporário para teste
+    const potion = {
+      id: itemId,
+      name: 'Poção Pequena',
+      healValue: 30,
+    };
+
+    if (battle.characterCurrentLife >= battle.characterMaxLife) {
+      throw new BadRequestException('O personagem já está com vida cheia.');
+    }
+
+    const healedLife = Math.min(
+      battle.characterCurrentLife + potion.healValue,
+      battle.characterMaxLife,
+    );
+
+    const healedAmount = healedLife - battle.characterCurrentLife;
+
+    await this.battleRepository.updateState({
+      battleId: battle.id,
+      characterCurrentLife: healedLife,
+    });
+
+    // Exemplo: consumir poção
+    // await this.characterInventoryService.consumeItem({
+    //   characterId: character.id,
+    //   itemId,
+    //   quantity: 1,
+    // });
+
+    const logs = [
+      `${character.nickname} usou ${potion.name} e recuperou ${healedAmount} de vida.`,
+    ];
+
+    let playerLifeRemaining = healedLife;
+
+    const monsterAttackResult = await this.monsterAttack({
+      battleId: battle.id,
+      battleCharacterCurrentLife: playerLifeRemaining,
+      character,
+      monster,
+    });
+
+    playerLifeRemaining = monsterAttackResult.playerLifeRemaining;
+    logs.push(monsterAttackResult.message);
+
+    if (monsterAttackResult.playerDefeated) {
+      await this.battleRepository.finishBattle({
+        battleId: battle.id,
+        winner: 'MONSTER',
+      });
+
+      logs.push(`${character.nickname} foi derrotado por ${monster.name}.`);
+    }
+
+    return {
+      action: 'USE_POTION',
+      usedItemId: itemId,
+      healedAmount,
+      monsterHit: monsterAttackResult.hit,
+      monsterDamage: monsterAttackResult.damage,
+      playerDefeated: monsterAttackResult.playerDefeated,
+      playerLifeRemaining,
+      monsterLifeRemaining: battle.monsterCurrentLife,
+      message: logs.join(' '),
+      logs,
     };
   }
 

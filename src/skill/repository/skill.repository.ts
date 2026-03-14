@@ -1,5 +1,6 @@
 import { Skill } from '@prisma/client';
 import { SkillCreateDto } from '../dto/skill.create.dto';
+import { SkillEntity } from '../entities/skill.entity';
 
 export abstract class SkillRepository {
   abstract create(data: SkillCreateDto): Promise<void>;
@@ -11,4 +12,5 @@ export abstract class SkillRepository {
     experience: number;
     toNextLevel: number;
   }): Promise<void>;
+  abstract findSkillById(id: string): Promise<SkillEntity | null>;
 }

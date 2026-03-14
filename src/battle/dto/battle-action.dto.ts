@@ -1,4 +1,4 @@
-import { IsIn, IsString, IsUUID } from 'class-validator';
+import { IsIn, IsOptional, IsString, IsUUID } from 'class-validator';
 
 export class BattleActionDto {
   @IsUUID()
@@ -7,4 +7,12 @@ export class BattleActionDto {
   @IsString()
   @IsIn(['ATTACK', 'FLEE'])
   action: 'ATTACK' | 'FLEE';
+
+  @IsOptional()
+  @IsString()
+  itemId?: string;
+
+  @IsOptional()
+  @IsString()
+  skillId?: string;
 }
